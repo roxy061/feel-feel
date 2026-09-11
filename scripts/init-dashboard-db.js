@@ -60,8 +60,10 @@ async function initDashboardDb() {
 
     // 3. Add columns to orders table
     try {
-      await conn.query("ALTER TABLE orders ADD COLUMN slip_url VARCHAR(500) NULL AFTER voucher_amount;");
-    } catch (e) {}
+      await conn.query("ALTER TABLE orders ADD COLUMN slip_url MEDIUMTEXT NULL AFTER voucher_amount;");
+    } catch (e) {
+      await conn.query("ALTER TABLE orders MODIFY COLUMN slip_url MEDIUMTEXT NULL;");
+    }
 
     try {
       await conn.query("ALTER TABLE orders ADD COLUMN payment_status VARCHAR(50) DEFAULT 'pending' AFTER slip_url;");

@@ -1,15 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { query } from "@/lib/db";
 import { redeemVoucher, extractVoucherCode } from "@/lib/truemoney";
-import fs from "fs";
-import path from "path";
 
 export async function POST(req: NextRequest) {
   try {
     const contentType = req.headers.get("content-type") || "";
     let body: any = {};
 
-    // 1. รองรับทั้ง JSON และ FormData (สำหรับการอัปโหลดสลิป)
+    // 1. รองรับทั้ง JSON และ FormData สำหรับ Vercel Serverless (บันทึกรูปเป็น Data URL ลงฐานข้อมูลโดยตรง)
     if (contentType.includes("multipart/form-data")) {
       const formData = await req.formData();
       body.store_id = formData.get("store_id");
@@ -21,38 +19,26 @@ export async function POST(req: NextRequest) {
       body.payment_method = formData.get("payment_method") || "bank_transfer";
       body.voucher_url = formData.get("voucher_url");
 
-      // ดึงไฟล์สลิปจาก FormData
+      // แปลงไฟล์สลิปจาก FormData เป็น Base64 Data URL โดยตรง (ไม่เขียนลงดิสก์)
       const file = formData.get("slip_file") as File | null;
       if (file && file.size > 0) {
         const buffer = Buffer.from(await file.arrayBuffer());
-        const ext = file.name.split(".").pop() || "jpg";
-        const filename = `slip-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-        const uploadDir = path.join(process.cwd(), "public", "uploads", "slips");
-        fs.mkdirSync(uploadDir, { recursive: true });
-        const filePath = path.join(uploadDir, filename);
-        fs.writeFileSync(filePath, buffer);
-        body.slip_url = `/uploads/slips/${filename}`;
+        const mimeType = file.type || "image/jpeg";
+        body.slip_url = `data:${mimeType};base64,${buffer.toString("base64")}`;
+      } else {
+        const slipString = formData.get("slip_image") || formData.get("slip_url");
+        if (slipString && typeof slipString === "string") {
+          body.slip_url = slipString;
+        }
       }
     } else {
       body = await req.json().catch(() => ({}));
       
-      // รองรับ Base64 Slip Upload ผ่าน JSON
+      // รองรับ Base64 Data URL จาก JSON โดยตรง
       if (body.slip_image && typeof body.slip_image === "string") {
-        try {
-          const matches = body.slip_image.match(/^data:image\/([a-zA-Z0-9]+);base64,(.+)$/);
-          if (matches && matches[2]) {
-            const ext = matches[1] === "png" ? "png" : "jpg";
-            const buffer = Buffer.from(matches[2], "base64");
-            const filename = `slip-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-            const uploadDir = path.join(process.cwd(), "public", "uploads", "slips");
-            fs.mkdirSync(uploadDir, { recursive: true });
-            const filePath = path.join(uploadDir, filename);
-            fs.writeFileSync(filePath, buffer);
-            body.slip_url = `/uploads/slips/${filename}`;
-          }
-        } catch (e) {
-          console.error("Failed to decode base64 slip:", e);
-        }
+        body.slip_url = body.slip_image.startsWith("data:image/")
+          ? body.slip_image
+          : `data:image/jpeg;base64,${body.slip_image}`;
       }
     }
 

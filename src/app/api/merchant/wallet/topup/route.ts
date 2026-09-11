@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { query } from "@/lib/db";
-import fs from "fs";
-import path from "path";
 
 export async function POST(req: NextRequest) {
   try {
@@ -25,21 +23,9 @@ export async function POST(req: NextRequest) {
 
     let slipUrl: string | null = null;
     if (body.slip_image && typeof body.slip_image === "string") {
-      try {
-        const matches = body.slip_image.match(/^data:image\/([a-zA-Z0-9]+);base64,(.+)$/);
-        if (matches && matches[2]) {
-          const ext = matches[1] === "png" ? "png" : "jpg";
-          const buffer = Buffer.from(matches[2], "base64");
-          const filename = `topup-slip-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-          const uploadDir = path.join(process.cwd(), "public", "uploads", "slips");
-          fs.mkdirSync(uploadDir, { recursive: true });
-          const filePath = path.join(uploadDir, filename);
-          fs.writeFileSync(filePath, buffer);
-          slipUrl = `/uploads/slips/${filename}`;
-        }
-      } catch (e) {
-        console.error("Failed to decode base64 topup slip:", e);
-      }
+      slipUrl = body.slip_image.startsWith("data:image/")
+        ? body.slip_image
+        : `data:image/jpeg;base64,${body.slip_image}`;
     }
 
     // 1. ดึง Wallet ID ของร้านค้า

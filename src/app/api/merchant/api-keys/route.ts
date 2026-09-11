@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { query } from "@/lib/db";
 import crypto from "crypto";
 
+export const dynamic = "force-dynamic";
+
 // GET: ดึงรายการ API Keys และ API Logs ล่าสุด
 export async function GET(req: NextRequest) {
   try {

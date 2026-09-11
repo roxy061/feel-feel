@@ -5,12 +5,18 @@ declare global {
   var mysqlPool: Pool | undefined;
 }
 
+// ตรวจสอบการเปิดใช้งาน SSL สำหรับ Cloud Database (TiDB Cloud, Aiven, PlanetScale, AWS RDS)
+const isSslEnabled =
+  process.env.DB_SSL === "true" ||
+  process.env.MYSQL_SSL === "true" ||
+  process.env.TIDB_SSL === "true";
+
 const poolConfig: PoolOptions = {
-  host: process.env.MYSQL_HOST || "localhost",
-  port: Number(process.env.MYSQL_PORT) || 3306,
-  user: process.env.MYSQL_USER || "root",
-  password: process.env.MYSQL_PASSWORD || "",
-  database: process.env.MYSQL_DATABASE || "3nfm_saas",
+  host: process.env.DB_HOST || process.env.MYSQL_HOST || "localhost",
+  port: Number(process.env.DB_PORT || process.env.MYSQL_PORT) || 3306,
+  user: process.env.DB_USER || process.env.MYSQL_USER || "root",
+  password: process.env.DB_PASSWORD || process.env.MYSQL_PASSWORD || "",
+  database: process.env.DB_NAME || process.env.MYSQL_DATABASE || "3nfm_saas",
   waitForConnections: true,
   connectionLimit: 10,
   maxIdle: 10,
@@ -18,9 +24,16 @@ const poolConfig: PoolOptions = {
   queueLimit: 0,
   enableKeepAlive: true,
   keepAliveInitialDelay: 0,
+  // รองรับ SSL สำหรับ Cloud Database เมื่อเปิดตัวแปร DB_SSL=true
+  ssl: isSslEnabled
+    ? {
+        rejectUnauthorized: process.env.DB_SSL_REJECT_UNAUTHORIZED !== "false",
+        minVersion: "TLSv1.2",
+      }
+    : undefined,
 };
 
-// Reuse connection pool across hot reloads in development
+// Reuse connection pool across hot reloads in development and serverless invocations
 export const db: Pool =
   global.mysqlPool || mysql.createPool(poolConfig);
 

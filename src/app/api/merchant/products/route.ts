@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { query } from "@/lib/db";
 
+export const dynamic = "force-dynamic";
+
 // GET: ดึงรายการสินค้าทั้งหมดของร้านค้า
 export async function GET(req: NextRequest) {
   try {
