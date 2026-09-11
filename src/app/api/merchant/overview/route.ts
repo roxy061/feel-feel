@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { query } from "@/lib/db";
+import { ensureDatabaseSeeded } from "@/lib/auto-seed";
 
 export const dynamic = "force-dynamic";
 
@@ -8,18 +9,44 @@ export async function GET(req: NextRequest) {
     const userId = "u-001";
     const storeKey = "store-3nfm";
 
-    // 1. ดึงข้อมูล User และ Token
-    const users = await query<any[]>(
-      "SELECT id, name, email, tokens FROM users WHERE id = ? LIMIT 1",
-      [userId]
-    );
+    // 1. ดึงข้อมูล User และ Token (พร้อม Fallback Auto-Seed หากยังไม่มีข้อมูล)
+    let users: any[] = [];
+    try {
+      users = await query<any[]>(
+        "SELECT id, name, email, tokens FROM users WHERE id = ? LIMIT 1",
+        [userId]
+      );
+    } catch {
+      await ensureDatabaseSeeded();
+      users = await query<any[]>(
+        "SELECT id, name, email, tokens FROM users WHERE id = ? LIMIT 1",
+        [userId]
+      );
+    }
+
+    if (!users || users.length === 0) {
+      await ensureDatabaseSeeded();
+      users = await query<any[]>(
+        "SELECT id, name, email, tokens FROM users WHERE id = ? LIMIT 1",
+        [userId]
+      );
+    }
+
     const user = users[0] || { id: userId, name: "3NFM Owner", tokens: 10 };
 
     // 2. ดึงข้อมูลร้านค้าและวันหมดอายุ
-    const stores = await query<any[]>(
+    let stores = await query<any[]>(
       "SELECT id, subdomain, name, tagline, expires_at, truemoney_phone FROM stores WHERE user_id = ? OR store_key = ? OR id = 1 LIMIT 1",
       [userId, storeKey]
     );
+
+    if (!stores || stores.length === 0) {
+      await ensureDatabaseSeeded();
+      stores = await query<any[]>(
+        "SELECT id, subdomain, name, tagline, expires_at, truemoney_phone FROM stores WHERE user_id = ? OR store_key = ? OR id = 1 LIMIT 1",
+        [userId, storeKey]
+      );
+    }
 
     if (!stores || stores.length === 0) {
       return NextResponse.json({ success: false, message: "Store not found" }, { status: 404 });

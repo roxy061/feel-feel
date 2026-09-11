@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { query } from "@/lib/db";
+import { ensureDatabaseSeeded } from "@/lib/auto-seed";
 
 export const dynamic = "force-dynamic";
 
@@ -8,15 +9,32 @@ export async function GET(req: NextRequest) {
     const storeId = 1;
     const userId = "u-001";
 
-    // 1. ดึงข้อมูลกระเป๋าเงิน (Wallet)
-    let wallets = await query<any[]>(
-      "SELECT id, balance, updated_at FROM wallets WHERE store_id = ? LIMIT 1",
-      [storeId]
-    );
+    // 1. ดึงข้อมูลกระเป๋าเงิน (Wallet) พร้อม Auto-Seed หากยังไม่มี
+    let wallets: any[] = [];
+    try {
+      wallets = await query<any[]>(
+        "SELECT id, balance, updated_at FROM wallets WHERE store_id = ? LIMIT 1",
+        [storeId]
+      );
+    } catch {
+      await ensureDatabaseSeeded();
+      wallets = await query<any[]>(
+        "SELECT id, balance, updated_at FROM wallets WHERE store_id = ? LIMIT 1",
+        [storeId]
+      );
+    }
 
     if (!wallets || wallets.length === 0) {
-      await query("INSERT INTO wallets (store_id, balance) VALUES (?, 100.00)", [storeId]);
-      wallets = [{ id: 1, balance: "100.0000" }];
+      await ensureDatabaseSeeded();
+      wallets = await query<any[]>(
+        "SELECT id, balance, updated_at FROM wallets WHERE store_id = ? LIMIT 1",
+        [storeId]
+      );
+    }
+
+    if (!wallets || wallets.length === 0) {
+      await query("INSERT INTO wallets (store_id, balance) VALUES (?, 150.00)", [storeId]);
+      wallets = [{ id: 1, balance: "150.0000" }];
     }
 
     const wallet = wallets[0];

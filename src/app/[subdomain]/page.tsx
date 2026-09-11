@@ -1,10 +1,13 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { query } from "@/lib/db";
+import { ensureDatabaseSeeded } from "@/lib/auto-seed";
 import StoreNavbar from "@/components/storefront/StoreNavbar";
 import HeroSection from "@/components/storefront/HeroSection";
 import ProductGrid from "@/components/storefront/ProductGrid";
 import StoreFooter from "@/components/storefront/StoreFooter";
+
+export const dynamic = "force-dynamic";
 
 interface TenantStorePageProps {
   params: {
@@ -43,10 +46,18 @@ export async function generateMetadata({
   const { subdomain } = params;
 
   try {
-    const stores = await query<StoreRecord[]>(
+    let stores = await query<StoreRecord[]>(
       "SELECT name, description, tagline FROM stores WHERE subdomain = ? LIMIT 1",
       [subdomain]
     );
+
+    if (!stores || stores.length === 0) {
+      await ensureDatabaseSeeded();
+      stores = await query<StoreRecord[]>(
+        "SELECT name, description, tagline FROM stores WHERE subdomain = ? LIMIT 1",
+        [subdomain]
+      );
+    }
 
     if (stores && stores.length > 0) {
       const store = stores[0];
@@ -70,16 +81,38 @@ export async function generateMetadata({
 export default async function TenantStorePage({ params }: TenantStorePageProps) {
   const { subdomain } = params;
 
-  // 1. ดึงข้อมูลร้านค้าจากตาราง stores โดยเทียบ subdomain (ถ้าไม่พบ ให้เรียก notFound())
+  // 1. ดึงข้อมูลร้านค้าจากตาราง stores โดยเทียบ subdomain
   let stores: StoreRecord[] = [];
   try {
     stores = await query<StoreRecord[]>(
       "SELECT * FROM stores WHERE subdomain = ? LIMIT 1",
       [subdomain]
     );
-  } catch (error) {
-    console.error(`[Database Error] Failed to fetch store for subdomain: ${subdomain}`, error);
-    notFound();
+  } catch {
+    // หากมีข้อผิดพลาด (เช่น ตารางยังไม่มีใน Cloud DB) ให้รัน Auto-Seed ทันที
+    try {
+      await ensureDatabaseSeeded();
+      stores = await query<StoreRecord[]>(
+        "SELECT * FROM stores WHERE subdomain = ? LIMIT 1",
+        [subdomain]
+      );
+    } catch (retryErr) {
+      console.error(`[Auto-Seed & Query Failed] Subdomain: ${subdomain}`, retryErr);
+      notFound();
+    }
+  }
+
+  // หากยังไม่พบร้านค้า (เช่น เข้าชม /3nfm หรือ /apex ครั้งแรกบนฐานข้อมูลใหม่) ให้เรียก Auto-Seed แล้วดึงซ้ำ
+  if (!stores || stores.length === 0) {
+    try {
+      await ensureDatabaseSeeded();
+      stores = await query<StoreRecord[]>(
+        "SELECT * FROM stores WHERE subdomain = ? LIMIT 1",
+        [subdomain]
+      );
+    } catch (err) {
+      console.error(`[Seed Retry Error]:`, err);
+    }
   }
 
   if (!stores || stores.length === 0) {

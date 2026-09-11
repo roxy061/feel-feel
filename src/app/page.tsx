@@ -10,18 +10,49 @@ import {
   Globe,
   Database,
   ExternalLink,
+  LayoutDashboard,
+  Wallet,
+  Code2,
+  Receipt,
 } from "lucide-react";
 import Link from "next/link";
 
 export default function HomePage() {
-  const sampleStores = [
-    { name: "Apex Electronics", subdomain: "apex", status: "Active", items: 42 },
-    { name: "Cyber Armor Depot", subdomain: "armor", status: "Active", items: 128 },
-    { name: "Retro Keyboards Lab", subdomain: "retro", status: "Active", items: 19 },
+  const showcasePortals = [
+    {
+      name: "3NFM Motorsport Lab",
+      subdomain: "3nfm",
+      badge: "Official Flagship",
+      description: "ศูนย์รวมนวัตกรรมชิ้นส่วนยานยนต์และแอโรไดนามิกส์ระดับการแข่งขัน ออกแบบเฉพาะทางเพื่อการขับขี่สมรรถนะสูงสุด",
+      items: 6,
+      accentColor: "border-amber-500/40 text-amber-400 bg-amber-950/30",
+      href: "/3nfm",
+      actionLabel: "เข้าชมหน้าร้าน 3NFM",
+    },
+    {
+      name: "Apex Performance",
+      subdomain: "apex",
+      badge: "Motorsport Spec",
+      description: "ผู้นำด้านอะไหล่และอุปกรณ์ยานยนต์สมรรถนะสูง ระบบเบรก ช่วงล่าง สปอยเลอร์คาร์บอน และท่อไอเสียไทเทเนียม",
+      items: 6,
+      accentColor: "border-sky-500/40 text-sky-400 bg-sky-950/30",
+      href: "/apex",
+      actionLabel: "เข้าชมหน้าร้าน Apex",
+    },
+    {
+      name: "Merchant Dashboard Suite",
+      subdomain: "dashboard",
+      badge: "Merchant Admin",
+      description: "ระบบบริหารจัดการร้านค้าแบบครบวงจร ตรวจสอบสลิปโอนเงิน อนุมัติออเดอร์ เติมเงิน Wallet และ Developer API Key",
+      items: "All-in-One",
+      accentColor: "border-emerald-500/40 text-emerald-400 bg-emerald-950/30",
+      href: "/dashboard",
+      actionLabel: "เปิดระบบจัดการ Dashboard",
+    },
   ];
 
   return (
-    <div className="min-h-[100dvh] bg-[#010101] text-[#EEEFF2] flex flex-col justify-between">
+    <div className="min-h-[100dvh] bg-[#010101] text-[#EEEFF2] flex flex-col justify-between selection:bg-[#272835] selection:text-[#EEEFF2]">
       {/* Top Navigation */}
       <nav className="border-b border-[#EEEFF2]/15 bg-[#010101]/80 backdrop-blur-md sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
@@ -34,72 +65,153 @@ export default function HomePage() {
                 3NFM
               </span>
               <span className="font-mono text-[10px] text-[#EEEFF2]/60 uppercase tracking-wider">
-                Multi-Tenant Engine
+                Multi-Tenant Commerce Engine
               </span>
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             <div className="hidden md:flex items-center gap-2 font-mono text-xs px-3 py-1.5 rounded-xl bg-[#272835] border border-[#EEEFF2]/15 text-[#EEEFF2]/80">
               <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
-              <span>Cluster: localhost:3000</span>
+              <span>Cluster: Production Ready</span>
             </div>
+
+            <Link
+              href="/dashboard"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#272835] hover:bg-[#343647] border border-[#EEEFF2]/20 text-xs font-semibold text-[#EEEFF2] transition-all"
+            >
+              <LayoutDashboard className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Merchant Suite</span>
+            </Link>
+
             <a
               href="#test-subdomains"
-              className="px-4 py-2 rounded-xl bg-[#EEEFF2] text-[#010101] text-xs font-semibold hover:bg-[#EEEFF2]/90 transition-all"
+              className="px-4 py-2 rounded-xl bg-[#EEEFF2] text-[#010101] text-xs font-semibold hover:bg-[#EEEFF2]/90 transition-all cursor-pointer"
             >
-              Explore Tenants
+              Explore Stores
             </a>
           </div>
         </div>
       </nav>
 
       {/* Hero Section */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-20">
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-[#272835] border border-[#EEEFF2]/20 text-xs font-mono text-[#EEEFF2] mb-6">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-[#272835] border border-[#EEEFF2]/20 text-xs font-mono text-[#EEEFF2] mb-6 shadow-sm">
             <Zap className="w-3.5 h-3.5 text-amber-400" />
-            <span>SAAS STOREFRONT ARCHITECTURE</span>
+            <span>ENTERPRISE MULTI-TENANT COMMERCE ARCHITECTURE</span>
           </div>
 
           <h1 className="font-bebas text-5xl sm:text-7xl lg:text-8xl tracking-wider text-[#EEEFF2] leading-none mb-6">
             HIGH PERFORMANCE STOREFRONT INFRASTRUCTURE
           </h1>
 
-          <p className="font-sans text-base sm:text-xl text-[#EEEFF2]/75 leading-relaxed mb-8">
-            Engineered with Next.js App Router, MySQL connection pooling, and automated subdomain routing for autonomous multi-tenant commerce.
+          <p className="font-sans text-base sm:text-lg text-[#EEEFF2]/75 leading-relaxed mb-8">
+            โครงสร้างระบบพาณิชย์อิเล็กทรอนิกส์มัลติเทแนนต์ พัฒนาด้วย Next.js App Router, MySQL Connection Pooling, ระบบชำระเงินซองอั่งเปา TrueMoney อัตโนมัติ, สลิป PromptPay Base64 และ Merchant Dashboard เต็มรูปแบบ
           </p>
 
           <div className="flex flex-wrap items-center justify-center gap-4">
-            <a
-              href="#test-subdomains"
-              className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-[#272835] hover:bg-[#343647] border border-[#EEEFF2]/20 text-sm font-semibold transition-all shadow-md"
+            <Link
+              href="/dashboard"
+              className="inline-flex items-center gap-2.5 px-6 py-3.5 rounded-xl bg-[#EEEFF2] text-[#010101] hover:bg-[#EEEFF2]/90 text-sm font-semibold transition-all shadow-xl active:scale-95"
             >
-              <Store className="w-4 h-4 text-[#EEEFF2]" />
-              <span>Launch Tenant Stores</span>
-              <ArrowRight className="w-4 h-4" />
-            </a>
-            <a
-              href="#architecture"
-              className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-transparent hover:bg-[#272835]/50 border border-[#EEEFF2]/15 text-sm font-medium transition-all"
+              <LayoutDashboard className="w-4 h-4 text-[#010101]" />
+              <span>เข้าสู่ Merchant Dashboard</span>
+              <ArrowRight className="w-4 h-4 text-[#010101]" />
+            </Link>
+
+            <Link
+              href="/3nfm"
+              className="inline-flex items-center gap-2 px-5 py-3.5 rounded-xl bg-[#272835] hover:bg-[#343647] border border-[#EEEFF2]/20 text-sm font-medium text-[#EEEFF2] transition-all"
             >
-              <Terminal className="w-4 h-4 text-[#EEEFF2]/80" />
-              <span>Inspect Stack</span>
-            </a>
+              <Store className="w-4 h-4 text-amber-400" />
+              <span>หน้าร้าน 3NFM Motorsport</span>
+            </Link>
+
+            <Link
+              href="/apex"
+              className="inline-flex items-center gap-2 px-5 py-3.5 rounded-xl bg-transparent hover:bg-[#272835]/50 border border-[#EEEFF2]/15 text-sm font-medium text-[#EEEFF2]/80 transition-all"
+            >
+              <Store className="w-4 h-4 text-sky-400" />
+              <span>หน้าร้าน Apex Performance</span>
+            </Link>
           </div>
         </div>
 
+        {/* Live Portals Gateway Section */}
+        <section id="test-subdomains" className="rounded-xl border border-[#EEEFF2]/15 bg-[#272835]/20 p-6 sm:p-10 mb-16">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+            <div>
+              <div className="font-bebas text-3xl sm:text-4xl tracking-wide text-[#EEEFF2]">
+                DEMO TENANTS & MANAGEMENT PORTAL
+              </div>
+              <p className="font-sans text-sm text-[#EEEFF2]/70 mt-1">
+                คลิกเพื่อทดสอบการทำงานของระบบร้านค้าเทแนนต์และระบบจัดการ Merchant แบบ End-to-End
+              </p>
+            </div>
+            <div className="inline-flex items-center gap-2 font-mono text-xs text-[#EEEFF2]/60 bg-[#272835] px-3 py-1.5 rounded-xl border border-[#EEEFF2]/10">
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Subdomain Rewriting Active</span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            {showcasePortals.map((portal) => (
+              <Link
+                key={portal.subdomain}
+                href={portal.href}
+                className="group p-6 rounded-xl bg-[#090A0F] border border-[#EEEFF2]/15 hover:border-[#EEEFF2]/40 transition-all flex flex-col justify-between hover:shadow-2xl"
+              >
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="font-mono text-xs px-2.5 py-1 rounded-lg bg-[#272835] text-[#EEEFF2]/80 border border-[#EEEFF2]/10">
+                      /{portal.subdomain}
+                    </span>
+                    <span
+                      className={`font-mono text-[11px] px-2.5 py-0.5 rounded-md border ${portal.accentColor}`}
+                    >
+                      {portal.badge}
+                    </span>
+                  </div>
+
+                  <div className="font-sans font-bold text-lg text-[#EEEFF2] group-hover:text-white transition-colors">
+                    {portal.name}
+                  </div>
+
+                  <p className="font-sans text-xs text-[#EEEFF2]/65 mt-2.5 leading-relaxed">
+                    {portal.description}
+                  </p>
+
+                  <div className="font-mono text-xs text-[#EEEFF2]/50 mt-4 flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                    <span>
+                      {typeof portal.items === "number"
+                        ? `${portal.items} active catalog products`
+                        : "Full suite unlocked"}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="mt-6 pt-4 border-t border-[#EEEFF2]/10 flex items-center justify-between text-xs font-semibold text-[#EEEFF2]/80 group-hover:text-white">
+                  <span>{portal.actionLabel}</span>
+                  <ExternalLink className="w-4 h-4 text-[#EEEFF2]/60 group-hover:text-[#EEEFF2] transition-colors" />
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+
         {/* Technical Architecture Specs */}
-        <section id="architecture" className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-20">
+        <section id="architecture" className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
           <div className="p-6 rounded-xl bg-[#090A0F] border border-[#EEEFF2]/15">
             <div className="w-10 h-10 rounded-xl bg-[#272835] border border-[#EEEFF2]/15 flex items-center justify-center mb-4 text-[#EEEFF2]">
               <Globe className="w-5 h-5 text-sky-400" />
             </div>
             <h3 className="font-bebas text-2xl tracking-wide text-[#EEEFF2] mb-2">
-              Subdomain Rewriting
+              Dynamic Subdomain Routing
             </h3>
             <p className="font-sans text-sm text-[#EEEFF2]/70 leading-relaxed mb-4">
-              Edge-ready Next.js middleware inspects host headers and rewrites requests dynamically to tenant storefronts with zero latency penalty.
+              Edge middleware ตรวจจับ Host header และ rewrite ไปยังโฟลเดอร์เทแนนต์ [subdomain] แบบ Zero Latency รองรับ Custom Domains
             </p>
             <div className="font-mono text-xs text-[#EEEFF2]/50 bg-[#272835]/50 p-2.5 rounded-xl border border-[#EEEFF2]/10">
               src/middleware.ts &rarr; /[subdomain]
@@ -111,79 +223,80 @@ export default function HomePage() {
               <Database className="w-5 h-5 text-emerald-400" />
             </div>
             <h3 className="font-bebas text-2xl tracking-wide text-[#EEEFF2] mb-2">
-              MySQL Connection Pool
+              Cloud MySQL & Auto-Seed
             </h3>
             <p className="font-sans text-sm text-[#EEEFF2]/70 leading-relaxed mb-4">
-              High-throughput connection pooling with development hot-reload cache preserving active connections and preventing pool exhaustion.
+              รองรับ TiDB Cloud / Vercel Serverless พร้อมระบบ Auto-Seed สร้างสคีมาและข้อมูลเริ่มต้นให้อัตโนมัติ ป้องกันปัญหา 404
             </p>
             <div className="font-mono text-xs text-[#EEEFF2]/50 bg-[#272835]/50 p-2.5 rounded-xl border border-[#EEEFF2]/10">
-              src/lib/db.ts &rarr; mysql2/promise
+              src/lib/db.ts & auto-seed.ts
             </div>
           </div>
 
           <div className="p-6 rounded-xl bg-[#090A0F] border border-[#EEEFF2]/15">
             <div className="w-10 h-10 rounded-xl bg-[#272835] border border-[#EEEFF2]/15 flex items-center justify-center mb-4 text-[#EEEFF2]">
-              <Cpu className="w-5 h-5 text-amber-400" />
+              <Receipt className="w-5 h-5 text-amber-400" />
             </div>
             <h3 className="font-bebas text-2xl tracking-wide text-[#EEEFF2] mb-2">
-              Strict Design Tokens
+              Dual Checkout & TrueMoney
             </h3>
             <p className="font-sans text-sm text-[#EEEFF2]/70 leading-relaxed mb-4">
-              Pure #010101 dark surface paired with #272835 deep contrast accents, 12px corner radii, and zero emojis for industrial precision.
+              ชำระเงินฉับไวด้วยลิงก์ซองของขวัญ TrueMoney ตัดยอดเงินอัตโนมัติ หรือ PromptPay QR พร้อมอัปโหลดสลิป Base64 ปลอดภัย
             </p>
             <div className="font-mono text-xs text-[#EEEFF2]/50 bg-[#272835]/50 p-2.5 rounded-xl border border-[#EEEFF2]/10">
-              Inter + Bebas Neue + JetBrains
+              src/lib/truemoney.ts & OrderModal
             </div>
           </div>
         </section>
 
-        {/* Live Tenant Stores Section */}
-        <section id="test-subdomains" className="rounded-xl border border-[#EEEFF2]/15 bg-[#272835]/20 p-8 sm:p-10 mb-16">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+        {/* Feature Highlights Grid */}
+        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          <div className="p-4 rounded-xl bg-[#272835]/30 border border-[#EEEFF2]/10 flex items-center gap-3">
+            <LayoutDashboard className="w-5 h-5 text-emerald-400 shrink-0" />
             <div>
-              <div className="font-bebas text-3xl sm:text-4xl tracking-wide text-[#EEEFF2]">
-                TEST TENANT STOREFRONTS
+              <div className="font-sans text-xs font-semibold text-[#EEEFF2]">
+                30-Day Token Renewal
               </div>
-              <p className="font-sans text-sm text-[#EEEFF2]/70 mt-1">
-                Click any tenant below to test dynamic App Router routing directly.
-              </p>
-            </div>
-            <div className="inline-flex items-center gap-2 font-mono text-xs text-[#EEEFF2]/60 bg-[#272835] px-3 py-1.5 rounded-xl border border-[#EEEFF2]/10">
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Middleware Ready</span>
+              <div className="font-mono text-[10px] text-[#EEEFF2]/50">
+                ต่ออายุร้านค้าด้วย 1 โทเคน
+              </div>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {sampleStores.map((store) => (
-              <Link
-                key={store.subdomain}
-                href={`/${store.subdomain}`}
-                className="group p-5 rounded-xl bg-[#090A0F] border border-[#EEEFF2]/15 hover:border-[#EEEFF2]/35 transition-all flex flex-col justify-between"
-              >
-                <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="font-mono text-xs px-2 py-0.5 rounded-xl bg-[#272835] text-[#EEEFF2]/80 border border-[#EEEFF2]/10">
-                      /{store.subdomain}
-                    </span>
-                    <span className="font-mono text-xs text-emerald-400">
-                      {store.status}
-                    </span>
-                  </div>
-                  <div className="font-sans font-semibold text-base text-[#EEEFF2] group-hover:text-white transition-colors">
-                    {store.name}
-                  </div>
-                  <div className="font-mono text-xs text-[#EEEFF2]/50 mt-1">
-                    {store.items} active catalog products
-                  </div>
-                </div>
+          <div className="p-4 rounded-xl bg-[#272835]/30 border border-[#EEEFF2]/10 flex items-center gap-3">
+            <Receipt className="w-5 h-5 text-sky-400 shrink-0" />
+            <div>
+              <div className="font-sans text-xs font-semibold text-[#EEEFF2]">
+                Slip Verification Modal
+              </div>
+              <div className="font-mono text-[10px] text-[#EEEFF2]/50">
+                อนุมัติสลิปและตัดสต็อกทันที
+              </div>
+            </div>
+          </div>
 
-                <div className="mt-6 pt-3 border-t border-[#EEEFF2]/10 flex items-center justify-between text-xs font-medium text-[#EEEFF2]/80 group-hover:text-white">
-                  <span>Visit Storefront</span>
-                  <ExternalLink className="w-3.5 h-3.5 text-[#EEEFF2]/60 group-hover:text-[#EEEFF2]" />
-                </div>
-              </Link>
-            ))}
+          <div className="p-4 rounded-xl bg-[#272835]/30 border border-[#EEEFF2]/10 flex items-center gap-3">
+            <Wallet className="w-5 h-5 text-amber-400 shrink-0" />
+            <div>
+              <div className="font-sans text-xs font-semibold text-[#EEEFF2]">
+                Wallet & Token Shop
+              </div>
+              <div className="font-mono text-[10px] text-[#EEEFF2]/50">
+                กระเป๋าเงินและซื้อแพ็กเกจ
+              </div>
+            </div>
+          </div>
+
+          <div className="p-4 rounded-xl bg-[#272835]/30 border border-[#EEEFF2]/10 flex items-center gap-3">
+            <Code2 className="w-5 h-5 text-purple-400 shrink-0" />
+            <div>
+              <div className="font-sans text-xs font-semibold text-[#EEEFF2]">
+                Developer API Portal
+              </div>
+              <div className="font-mono text-[10px] text-[#EEEFF2]/50">
+                64-Char Keys & 0.35 THB Log
+              </div>
+            </div>
           </div>
         </section>
       </main>
@@ -194,11 +307,11 @@ export default function HomePage() {
           <div className="flex items-center gap-3">
             <ShieldCheck className="w-5 h-5 text-[#EEEFF2]/60" />
             <span className="font-sans text-sm text-[#EEEFF2]/70">
-              3NFM Multi-Tenant SaaS Platform &copy; {new Date().getFullYear()}
+              3NFM Multi-Tenant SaaS Platform &copy; {new Date().getFullYear()} &bull; Production Spec
             </span>
           </div>
           <div className="flex items-center gap-3 font-mono text-xs text-[#EEEFF2]/50">
-            <span>Root Domain: localhost:3000</span>
+            <span>Powered by Next.js App Router & MySQL Pool</span>
           </div>
         </div>
       </footer>

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { query } from "@/lib/db";
+import { ensureDatabaseSeeded } from "@/lib/auto-seed";
 import crypto from "crypto";
 
 export const dynamic = "force-dynamic";
@@ -9,24 +10,52 @@ export async function GET(req: NextRequest) {
   try {
     const storeId = 1;
 
-    // 1. ดึงรายการ API Keys ทั้งหมด
-    const keys = await query<any[]>(
-      `SELECT id, store_id, key_name, api_key, rate_limit, is_active, created_at, last_used_at 
-       FROM api_keys 
-       WHERE store_id = ? 
-       ORDER BY id DESC`,
-      [storeId]
-    );
+    // 1. ดึงรายการ API Keys ทั้งหมด (พร้อม auto-seed หากเพิ่งเริ่มต้น)
+    let keys: any[] = [];
+    try {
+      keys = await query<any[]>(
+        `SELECT id, store_id, key_name, api_key, rate_limit, is_active, created_at, last_used_at 
+         FROM api_keys 
+         WHERE store_id = ? 
+         ORDER BY id DESC`,
+        [storeId]
+      );
+    } catch {
+      await ensureDatabaseSeeded();
+      keys = await query<any[]>(
+        `SELECT id, store_id, key_name, api_key, rate_limit, is_active, created_at, last_used_at 
+         FROM api_keys 
+         WHERE store_id = ? 
+         ORDER BY id DESC`,
+        [storeId]
+      );
+    }
+
+    if (!keys || keys.length === 0) {
+      await ensureDatabaseSeeded();
+      keys = await query<any[]>(
+        `SELECT id, store_id, key_name, api_key, rate_limit, is_active, created_at, last_used_at 
+         FROM api_keys 
+         WHERE store_id = ? 
+         ORDER BY id DESC`,
+        [storeId]
+      );
+    }
 
     // 2. ดึงประวัติการเรียกใช้งาน (API Logs) ล่าสุด 50 รายการ
-    const logs = await query<any[]>(
-      `SELECT id, api_key_id, endpoint, method, ip_address, status_code, cost, response_message, created_at 
-       FROM api_logs 
-       WHERE store_id = ? 
-       ORDER BY id DESC 
-       LIMIT 50`,
-      [storeId]
-    );
+    let logs: any[] = [];
+    try {
+      logs = await query<any[]>(
+        `SELECT id, api_key_id, endpoint, method, ip_address, status_code, cost, response_message, created_at 
+         FROM api_logs 
+         WHERE store_id = ? 
+         ORDER BY id DESC 
+         LIMIT 50`,
+        [storeId]
+      );
+    } catch {
+      logs = [];
+    }
 
     return NextResponse.json({
       success: true,
