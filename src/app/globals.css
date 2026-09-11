@@ -1,0 +1,54 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* 3NFM Design Tokens */
+  --background: #010101;
+  --surface-accent: #272835;
+  --neutral-foreground: #EEEFF2;
+  --border-color: #EEEFF2;
+  --radius-base: 12px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  background-color: #010101;
+  color: #EEEFF2;
+  min-height: 100dvh;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Strict Design Rule: enforce min-h-[100dvh] across viewports */
+.app-container {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Custom scrollbar matching dark surface */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #010101;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #272835;
+  border-radius: 9999px;
+  border: 2px solid #010101;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #3A3C4E;
+}
