@@ -1,0 +1,130 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Store {
+  id              String             @id @default(cuid())
+  subdomain       String             @unique
+  customDomain    String?            @unique
+  name            String
+  description     String?
+  logoUrl         String?
+  bannerUrl       String?
+  primaryColor    String             @default("#2563eb")
+  promptpayNumber String             @default("0812345678")
+  promptpayName   String             @default("เจ้าของร้านค้า")
+  status          String             @default("ACTIVE") // ACTIVE, SUSPENDED, EXPIRED
+  expireAt        DateTime
+  tokenBalance    Int                @default(1)
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+
+  wallet          Wallet?
+  products        Product[]
+  orders          Order[]
+  apiKeys         ApiKey[]
+  usageLogs       ApiUsageLog[]
+}
+
+model Wallet {
+  id           String              @id @default(cuid())
+  storeId      String              @unique
+  store        Store               @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  balance      Float               @default(150.0) // initial credit
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+  transactions WalletTransaction[]
+}
+
+model WalletTransaction {
+  id          String   @id @default(cuid())
+  walletId    String
+  wallet      Wallet   @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  amount      Float    // + for credit, - for deduction
+  type        String   // TOPUP, API_DEDUCTION, SUBSCRIPTION_RENEWAL
+  description String
+  reference   String?
+  createdAt   DateTime @default(now())
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  storeId     String
+  store       Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  name        String
+  description String?
+  price       Float
+  stock       Int      @default(10)
+  imageUrl    String?
+  category    String   @default("ทั่วไป")
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  orderItems  OrderItem[]
+}
+
+model Order {
+  id              String      @id @default(cuid())
+  storeId         String
+  store           Store       @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  orderNumber     String      @unique
+  customerName    String
+  customerPhone   String
+  customerAddress String
+  totalAmount     Float
+  status          String      @default("PENDING") // PENDING, PAID, SHIPPED, CANCELLED
+  paymentMethod   String      @default("PROMPTPAY")
+  slipUrl         String?
+  slipRef         String?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  items           OrderItem[]
+}
+
+model OrderItem {
+  id          String   @id @default(cuid())
+  orderId     String
+  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id])
+  productName String
+  price       Float
+  quantity    Int
+}
+
+model ApiKey {
+  id          String        @id @default(cuid())
+  storeId     String
+  store       Store         @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  keyPrefix   String        // e.g. "sk_live_3f9a"
+  keyHash     String        @unique // full key or hash
+  name        String        @default("Default Production Key")
+  rateLimit   Int           @default(60) // requests per minute
+  isActive    Boolean       @default(true)
+  lastUsedAt  DateTime?
+  createdAt   DateTime      @default(now())
+
+  usageLogs   ApiUsageLog[]
+}
+
+model ApiUsageLog {
+  id         String    @id @default(cuid())
+  storeId    String
+  store      Store     @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  apiKeyId   String?
+  apiKey     ApiKey?   @relation(fields: [apiKeyId], references: [id], onDelete: SetNull)
+  endpoint   String
+  method     String
+  statusCode Int
+  latencyMs  Int
+  cost       Float     @default(0.35)
+  ipAddress  String?
+  createdAt  DateTime  @default(now())
+}
