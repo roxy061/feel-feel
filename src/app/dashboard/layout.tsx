@@ -84,15 +84,28 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
               </div>
             </div>
 
-            <Link
-              href="/apex"
-              target="_blank"
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#EEEFF2] hover:bg-[#EEEFF2]/90 text-[#010101] font-semibold text-xs transition-all shadow-sm active:scale-95"
-            >
-              <Store className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">หน้าร้านค้า</span>
-              <ExternalLink className="w-3 h-3" />
-            </Link>
+            <div className="flex items-center gap-1.5">
+              <Link
+                href="/3nfm"
+                target="_blank"
+                className="inline-flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-xl bg-[#272835] hover:bg-[#343647] border border-amber-500/30 text-amber-300 font-semibold text-xs transition-all"
+                title="เปิดหน้าร้าน 3NFM Motorsport Lab"
+              >
+                <Store className="w-3.5 h-3.5 text-amber-400" />
+                <span>3NFM</span>
+                <ExternalLink className="w-2.5 h-2.5 opacity-70" />
+              </Link>
+              <Link
+                href="/apex"
+                target="_blank"
+                className="inline-flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-xl bg-[#272835] hover:bg-[#343647] border border-sky-500/30 text-sky-300 font-semibold text-xs transition-all"
+                title="เปิดหน้าร้าน Apex Performance"
+              >
+                <Store className="w-3.5 h-3.5 text-sky-400" />
+                <span>Apex</span>
+                <ExternalLink className="w-2.5 h-2.5 opacity-70" />
+              </Link>
+            </div>
           </div>
         </div>
       </header>

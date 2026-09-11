@@ -1,15 +1,26 @@
 import { NextRequest, NextResponse } from "next/server";
 import { query } from "@/lib/db";
+import { ensureDatabaseSeeded } from "@/lib/auto-seed";
 
 export async function POST(req: NextRequest) {
   try {
     const userId = "u-001";
+    const body = await req.json().catch(() => ({}));
+    const targetStoreId = body?.store_id;
 
     // 1. ตรวจสอบโทเคนคงเหลือของ User
-    const users = await query<any[]>(
+    let users = await query<any[]>(
       "SELECT id, tokens FROM users WHERE id = ? LIMIT 1",
       [userId]
     );
+
+    if (!users || users.length === 0) {
+      await ensureDatabaseSeeded();
+      users = await query<any[]>(
+        "SELECT id, tokens FROM users WHERE id = ? LIMIT 1",
+        [userId]
+      );
+    }
 
     if (!users || users.length === 0) {
       return NextResponse.json(
@@ -31,10 +42,12 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 2. ดึงร้านค้าของ User
+    // 2. ดึงร้านค้าที่ต้องการต่ออายุ
     const stores = await query<any[]>(
-      "SELECT id, expires_at FROM stores WHERE user_id = ? OR id = 1 LIMIT 1",
-      [userId]
+      targetStoreId
+        ? "SELECT id, name, expires_at FROM stores WHERE id = ? LIMIT 1"
+        : "SELECT id, name, expires_at FROM stores WHERE user_id = ? OR id = 1 LIMIT 1",
+      targetStoreId ? [targetStoreId] : [userId]
     );
 
     if (!stores || stores.length === 0) {
@@ -53,7 +66,6 @@ export async function POST(req: NextRequest) {
     );
 
     // 4. บวกเวลา expires_at เพิ่ม 30 วันในตาราง stores
-    // หากยังไม่หมดอายุ ให้บวกต่อจาก expires_at เดิม หากหมดอายุแล้วให้เริ่มนับจากวันนี้
     await query(
       `UPDATE stores 
        SET expires_at = IF(expires_at > NOW(), DATE_ADD(expires_at, INTERVAL 30 DAY), DATE_ADD(NOW(), INTERVAL 30 DAY))
@@ -72,8 +84,9 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: "ต่ออายุร้านค้าสำเร็จ (+30 วัน)",
+      message: `ต่ออายุร้านค้า ${store.name} สำเร็จ (+30 วัน)`,
       data: {
+        store_id: store.id,
         tokens: newTokens,
         expires_at: newExpiresAt.toISOString(),
         status: "Active",

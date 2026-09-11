@@ -1,6 +1,6 @@
 "use client";
 
-import { Store, ShoppingBag, ArrowLeft, ShieldCheck } from "lucide-react";
+import { Store, ShoppingBag, ArrowLeft, LayoutDashboard, ArrowRightLeft } from "lucide-react";
 import Link from "next/link";
 
 interface StoreNavbarProps {
@@ -16,6 +16,8 @@ export default function StoreNavbar({
   cartCount = 0,
   onOpenCart,
 }: StoreNavbarProps) {
+  const alternateStore = subdomain === "3nfm" ? { name: "Apex", path: "/apex" } : { name: "3NFM", path: "/3nfm" };
+
   return (
     <header className="absolute top-0 inset-x-0 z-30 h-20 border-b border-[#EEEFF2]/10 bg-transparent backdrop-blur-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center justify-between">
@@ -41,27 +43,44 @@ export default function StoreNavbar({
         </div>
 
         {/* Right: Actions */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5 sm:gap-3">
+          {/* Switch to alternate store */}
           <Link
-            href="/"
-            className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#272835]/60 hover:bg-[#272835] border border-[#EEEFF2]/15 text-xs text-[#EEEFF2]/80 hover:text-white transition-all font-sans"
+            href={alternateStore.path}
+            className="hidden md:inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-[#272835]/50 hover:bg-[#272835] border border-[#EEEFF2]/10 text-xs text-[#EEEFF2]/75 hover:text-white transition-all font-sans"
+            title={`สลับไปร้าน ${alternateStore.name}`}
           >
-            <ArrowLeft className="w-3.5 h-3.5" />
-            <span>3NFM Platform</span>
+            <ArrowRightLeft className="w-3.5 h-3.5 text-sky-400" />
+            <span>ไปร้าน {alternateStore.name}</span>
           </Link>
 
-          <button
-            type="button"
-            onClick={onOpenCart}
-            className="relative flex items-center gap-2 px-4 py-2 rounded-xl bg-[#272835] hover:bg-[#343647] border border-[#EEEFF2]/20 text-sm font-medium text-[#EEEFF2] transition-all shadow-md active:scale-95"
-            aria-label="View Shopping Cart"
+          {/* Link to Merchant Dashboard */}
+          <Link
+            href="/dashboard"
+            className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#272835]/70 hover:bg-[#272835] border border-[#EEEFF2]/15 text-xs text-[#EEEFF2] transition-all font-sans"
           >
-            <ShoppingBag className="w-4 h-4 text-[#EEEFF2]" />
-            <span className="hidden sm:inline font-sans text-xs font-semibold">ตะกร้า</span>
-            <span className="font-mono text-xs px-2 py-0.5 rounded-lg bg-[#010101] text-[#EEEFF2] border border-[#EEEFF2]/15 font-bold">
-              {cartCount}
+            <LayoutDashboard className="w-3.5 h-3.5 text-emerald-400" />
+            <span>Merchant Suite</span>
+          </Link>
+
+          {/* Cart Button linking to Products Catalog */}
+          <a
+            href="#products-catalog"
+            onClick={(e) => {
+              if (onOpenCart) {
+                e.preventDefault();
+                onOpenCart();
+              }
+            }}
+            className="relative flex items-center gap-2 px-4 py-2 rounded-xl bg-[#EEEFF2] hover:bg-[#EEEFF2]/90 text-[#010101] text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer"
+            aria-label="View Shopping Catalog"
+          >
+            <ShoppingBag className="w-4 h-4 text-[#010101]" />
+            <span>เลือกซื้อสินค้า</span>
+            <span className="font-mono text-[11px] px-1.5 py-0.5 rounded-md bg-[#010101] text-[#EEEFF2]">
+              {cartCount > 0 ? cartCount : "6"}
             </span>
-          </button>
+          </a>
         </div>
       </div>
     </header>

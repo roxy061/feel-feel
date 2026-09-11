@@ -7,9 +7,10 @@ export const dynamic = "force-dynamic";
 export async function GET(req: NextRequest) {
   try {
     const userId = "u-001";
-    const storeKey = "store-3nfm";
+    const { searchParams } = new URL(req.url);
+    const selectedStoreId = searchParams.get("store_id");
 
-    // 1. ดึงข้อมูล User และ Token (พร้อม Fallback Auto-Seed หากยังไม่มีข้อมูล)
+    // 1. ดึงข้อมูล User และ Token (พร้อม Fallback Auto-Seed)
     let users: any[] = [];
     try {
       users = await query<any[]>(
@@ -34,44 +35,49 @@ export async function GET(req: NextRequest) {
 
     const user = users[0] || { id: userId, name: "3NFM Owner", tokens: 10 };
 
-    // 2. ดึงข้อมูลร้านค้าและวันหมดอายุ
-    let stores = await query<any[]>(
-      "SELECT id, subdomain, name, tagline, expires_at, truemoney_phone FROM stores WHERE user_id = ? OR store_key = ? OR id = 1 LIMIT 1",
-      [userId, storeKey]
+    // 2. ดึงรายการร้านค้าทั้งหมดของผู้ใช้
+    let allStores = await query<any[]>(
+      "SELECT id, subdomain, name, tagline, expires_at, truemoney_phone FROM stores WHERE user_id = ? OR id IN (1, 2, 3) ORDER BY id ASC",
+      [userId]
     );
 
-    if (!stores || stores.length === 0) {
+    if (!allStores || allStores.length === 0) {
       await ensureDatabaseSeeded();
-      stores = await query<any[]>(
-        "SELECT id, subdomain, name, tagline, expires_at, truemoney_phone FROM stores WHERE user_id = ? OR store_key = ? OR id = 1 LIMIT 1",
-        [userId, storeKey]
+      allStores = await query<any[]>(
+        "SELECT id, subdomain, name, tagline, expires_at, truemoney_phone FROM stores WHERE user_id = ? OR id IN (1, 2, 3) ORDER BY id ASC",
+        [userId]
       );
     }
 
-    if (!stores || stores.length === 0) {
+    if (!allStores || allStores.length === 0) {
       return NextResponse.json({ success: false, message: "Store not found" }, { status: 404 });
     }
 
-    const store = stores[0];
+    // เลือกร้านค้าที่ต้องการแสดงผล (ตาม selectedStoreId หรือร้านแรก)
+    const store = selectedStoreId
+      ? allStores.find((s) => String(s.id) === String(selectedStoreId)) || allStores[0]
+      : allStores[0];
+
     const now = new Date();
     const expiresAt = store.expires_at ? new Date(store.expires_at) : new Date(Date.now() + 30 * 86400000);
     const isExpired = expiresAt < now;
     const diffTime = expiresAt.getTime() - now.getTime();
     const daysRemaining = Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
 
-    // 3. ดึงสถิติคำสั่งซื้อ
+    // 3. ดึงสถิติคำสั่งซื้อ (รวมทุกร้านค้าของเจ้าของร้าน หรือกรองตามร้าน)
+    const storeIds = allStores.map((s) => s.id);
+    const inClause = storeIds.join(",");
+
     const stats = await query<any[]>(
       `SELECT 
         COUNT(*) as total_orders,
         IFNULL(SUM(CASE WHEN status IN ('paid', 'completed') THEN total_amount ELSE 0 END), 0) as total_revenue,
         COUNT(CASE WHEN status = 'pending' THEN 1 END) as pending_orders
-       FROM orders WHERE store_id = ?`,
-      [store.id]
+       FROM orders WHERE store_id IN (${inClause})`
     );
 
     const productStats = await query<any[]>(
-      "SELECT COUNT(*) as total_products FROM products WHERE store_id = ?",
-      [store.id]
+      `SELECT COUNT(*) as total_products FROM products WHERE store_id IN (${inClause})`
     );
 
     return NextResponse.json({
@@ -90,6 +96,13 @@ export async function GET(req: NextRequest) {
           status: isExpired ? "Expired" : "Active",
           days_remaining: daysRemaining,
         },
+        all_stores: allStores.map((s) => ({
+          id: s.id,
+          name: s.name,
+          subdomain: s.subdomain,
+          expires_at: s.expires_at,
+          is_active: new Date(s.expires_at || Date.now() + 86400000) > new Date(),
+        })),
         stats: {
           total_orders: stats[0]?.total_orders || 0,
           total_revenue: parseFloat(stats[0]?.total_revenue || "0"),

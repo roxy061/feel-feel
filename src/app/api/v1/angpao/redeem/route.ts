@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { query } from "@/lib/db";
 import { redeemVoucher, extractVoucherCode } from "@/lib/truemoney";
+import { ensureDatabaseSeeded } from "@/lib/auto-seed";
 
 const API_FEE = 0.35; // ค่าธรรมเนียม 0.35 บาทต่อรายการสำเร็จ
 
 export async function POST(req: NextRequest) {
-  const startTime = Date.now();
   const ipAddress =
     req.headers.get("x-forwarded-for")?.split(",")[0] ||
     req.headers.get("x-real-ip") ||
@@ -26,10 +26,18 @@ export async function POST(req: NextRequest) {
   }
 
   // ดึงข้อมูล API Key จากฐานข้อมูล
-  const keyRecords = await query<any[]>(
+  let keyRecords = await query<any[]>(
     "SELECT id, store_id, key_name, rate_limit, is_active FROM api_keys WHERE api_key = ? LIMIT 1",
     [apiKeyHeader]
   );
+
+  if (!keyRecords || keyRecords.length === 0) {
+    await ensureDatabaseSeeded();
+    keyRecords = await query<any[]>(
+      "SELECT id, store_id, key_name, rate_limit, is_active FROM api_keys WHERE api_key = ? LIMIT 1",
+      [apiKeyHeader]
+    );
+  }
 
   if (!keyRecords || keyRecords.length === 0 || !keyRecords[0].is_active) {
     return NextResponse.json(
@@ -66,20 +74,17 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // 3. ตรวจสอบยอดเงินคงเหลือในตาราง wallets (ต้องมีอย่างน้อย 0.35 บาท)
-  const walletRecords = await query<any[]>(
+  // 3. ตรวจสอบยอดเงินคงเหลือในตาราง wallets (พร้อมสร้างให้อัตโนมัติหากยังไม่มี)
+  let walletRecords = await query<any[]>(
     "SELECT id, balance FROM wallets WHERE store_id = ? LIMIT 1",
     [apiKey.store_id]
   );
 
   if (!walletRecords || walletRecords.length === 0) {
-    return NextResponse.json(
-      {
-        status: "error",
-        code: "WALLET_NOT_FOUND",
-        message: "Merchant wallet not initialized. Please contact support.",
-      },
-      { status: 404 }
+    await query("INSERT INTO wallets (store_id, balance) VALUES (?, 150.00)", [apiKey.store_id]);
+    walletRecords = await query<any[]>(
+      "SELECT id, balance FROM wallets WHERE store_id = ? LIMIT 1",
+      [apiKey.store_id]
     );
   }
 

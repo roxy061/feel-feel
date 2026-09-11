@@ -13,8 +13,17 @@ import {
   CheckCircle2,
   Calendar,
   ExternalLink,
+  ArrowRightLeft,
 } from "lucide-react";
 import Link from "next/link";
+
+interface StoreItem {
+  id: number;
+  name: string;
+  subdomain: string;
+  expires_at: string;
+  is_active?: boolean;
+}
 
 interface StoreOverviewCardProps {
   data: {
@@ -31,6 +40,7 @@ interface StoreOverviewCardProps {
       status: string;
       days_remaining: number;
     };
+    all_stores?: StoreItem[];
     stats: {
       total_orders: number;
       total_revenue: number;
@@ -47,9 +57,17 @@ export default function StoreOverviewCard({
 }: StoreOverviewCardProps) {
   const [isRenewing, setIsRenewing] = useState(false);
   const [feedback, setFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
+  const [activeStoreId, setActiveStoreId] = useState<number>(data.store.id);
 
-  const { user, store, stats } = data;
-  const isExpired = store.status === "Expired" || store.days_remaining <= 0;
+  const { user, store, stats, all_stores = [] } = data;
+
+  // Active store selected by user
+  const currentStore = all_stores.find((s) => s.id === activeStoreId) || store;
+  const currentExpiresAt = new Date(currentStore.expires_at || store.expires_at);
+  const now = new Date();
+  const diffTime = currentExpiresAt.getTime() - now.getTime();
+  const daysRemaining = Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
+  const isExpired = daysRemaining <= 0;
 
   const handleRenewStore = async () => {
     if (user.tokens < 1) {
@@ -66,6 +84,8 @@ export default function StoreOverviewCard({
     try {
       const res = await fetch("/api/merchant/renew", {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ store_id: currentStore.id }),
       });
       const result = await res.json();
 
@@ -75,7 +95,7 @@ export default function StoreOverviewCard({
 
       setFeedback({
         type: "success",
-        message: "ต่ออายุร้านค้าสำเร็จ (+30 วัน) หัก 1 โทเคนเรียบร้อยแล้ว",
+        message: `ต่ออายุร้านค้า ${currentStore.name} สำเร็จ (+30 วัน) หัก 1 โทเคนเรียบร้อยแล้ว`,
       });
 
       onRenewSuccess(result.data.tokens, result.data.expires_at);
@@ -89,7 +109,7 @@ export default function StoreOverviewCard({
     }
   };
 
-  const formattedExpireDate = new Date(store.expires_at).toLocaleDateString("th-TH", {
+  const formattedExpireDate = currentExpiresAt.toLocaleDateString("th-TH", {
     year: "numeric",
     month: "long",
     day: "numeric",
@@ -99,6 +119,35 @@ export default function StoreOverviewCard({
     <div className="space-y-6">
       {/* Top Banner: Store Status & Renewal */}
       <div className="p-6 sm:p-8 rounded-xl bg-[#272835] border border-[#EEEFF2]/15 shadow-xl">
+        {/* Store Selector Pill bar if multiple stores */}
+        {all_stores.length > 1 && (
+          <div className="flex items-center justify-between pb-4 mb-5 border-b border-[#EEEFF2]/10 flex-wrap gap-2">
+            <div className="flex items-center gap-2 text-xs font-mono text-[#EEEFF2]/60">
+              <Store className="w-4 h-4 text-sky-400" />
+              <span>เลือกร้านค้าที่ต้องการจัดการ:</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              {all_stores.map((s) => (
+                <button
+                  key={s.id}
+                  type="button"
+                  onClick={() => {
+                    setActiveStoreId(s.id);
+                    setFeedback(null);
+                  }}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-sans transition-all cursor-pointer ${
+                    activeStoreId === s.id
+                      ? "bg-[#EEEFF2] text-[#010101] font-bold shadow-md"
+                      : "bg-[#010101]/60 text-[#EEEFF2]/70 hover:bg-[#010101] hover:text-[#EEEFF2] border border-[#EEEFF2]/10"
+                  }`}
+                >
+                  {s.name} (/{s.subdomain})
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           {/* Store Info */}
           <div className="flex items-start gap-4">
@@ -108,7 +157,7 @@ export default function StoreOverviewCard({
             <div>
               <div className="flex items-center gap-2.5 flex-wrap">
                 <h2 className="font-bebas text-3xl sm:text-4xl tracking-wide text-[#EEEFF2] leading-none">
-                  {store.name}
+                  {currentStore.name}
                 </h2>
                 <span
                   className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-mono font-semibold border ${
@@ -128,10 +177,10 @@ export default function StoreOverviewCard({
 
               <div className="flex items-center gap-3 mt-2 text-xs font-mono text-[#EEEFF2]/70">
                 <span className="bg-[#010101]/60 px-2.5 py-1 rounded-lg border border-[#EEEFF2]/10">
-                  Subdomain: {store.subdomain}.3nfm.shop
+                  Subdomain: {currentStore.subdomain}.3nfm.shop
                 </span>
                 <Link
-                  href={`/${store.subdomain}`}
+                  href={`/${currentStore.subdomain}`}
                   target="_blank"
                   className="inline-flex items-center gap-1 text-sky-400 hover:text-sky-300 transition-colors"
                 >
@@ -168,7 +217,7 @@ export default function StoreOverviewCard({
               className="flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-[#EEEFF2] hover:bg-[#EEEFF2]/90 disabled:bg-[#272835] text-[#010101] disabled:text-[#EEEFF2]/40 font-semibold text-xs transition-all shadow-lg active:scale-95 cursor-pointer disabled:cursor-not-allowed whitespace-nowrap"
             >
               <RotateCw className={`w-4 h-4 ${isRenewing ? "animate-spin" : ""}`} />
-              <span>ต่ออายุร้านค้า (+30 วัน) &bull; ใช้ 1 โทเคน</span>
+              <span>ต่ออายุร้านค้านี้ (+30 วัน) &bull; ใช้ 1 โทเคน</span>
             </button>
           </div>
         </div>
@@ -188,12 +237,12 @@ export default function StoreOverviewCard({
             <span>คงเหลือเวลา:</span>
             <span
               className={`font-bold px-2 py-0.5 rounded-lg ${
-                store.days_remaining <= 5
+                daysRemaining <= 5
                   ? "bg-rose-950 text-rose-300 border border-rose-500/30"
                   : "bg-[#010101]/40 text-emerald-400 border border-[#EEEFF2]/10"
               }`}
             >
-              {store.days_remaining} วัน
+              {daysRemaining} วัน
             </span>
           </div>
         </div>
@@ -222,7 +271,7 @@ export default function StoreOverviewCard({
         <div className="p-5 rounded-xl bg-[#272835] border border-[#EEEFF2]/15">
           <div className="flex items-center justify-between mb-2">
             <span className="font-sans text-xs text-[#EEEFF2]/60 font-medium">
-              ยอดขายรวมทั้งสิ้น
+              ยอดขายรวมทุกร้านค้า
             </span>
             <div className="p-2 rounded-lg bg-[#010101]/50 text-emerald-400 border border-[#EEEFF2]/10">
               <TrendingUp className="w-4 h-4" />

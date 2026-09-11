@@ -32,6 +32,8 @@ interface Order {
   voucher_code: string | null;
   voucher_amount: number | string;
   slip_url: string | null;
+  store_name?: string;
+  subdomain?: string;
   payment_status: string;
   status: string;
   created_at: string;
@@ -185,11 +187,22 @@ export default function OrderVerification({
                       <div className="font-mono font-bold text-[#EEEFF2]">
                         {ord.order_number}
                       </div>
-                      <div className="font-mono text-[10px] text-[#EEEFF2]/40 mt-0.5">
-                        {new Date(ord.created_at).toLocaleString("th-TH", {
-                          dateStyle: "short",
-                          timeStyle: "short",
-                        })}
+                      <div className="flex items-center gap-2 mt-1">
+                        <span
+                          className={`font-mono text-[10px] px-1.5 py-0.2 rounded border ${
+                            ord.subdomain === "3nfm" || ord.store_id === 3
+                              ? "bg-amber-950/70 text-amber-400 border-amber-500/30"
+                              : "bg-sky-950/70 text-sky-400 border-sky-500/30"
+                          }`}
+                        >
+                          {ord.subdomain === "3nfm" || ord.store_id === 3 ? "3NFM" : "Apex"}
+                        </span>
+                        <span className="font-mono text-[10px] text-[#EEEFF2]/40">
+                          {new Date(ord.created_at).toLocaleString("th-TH", {
+                            dateStyle: "short",
+                            timeStyle: "short",
+                          })}
+                        </span>
                       </div>
                     </td>
 

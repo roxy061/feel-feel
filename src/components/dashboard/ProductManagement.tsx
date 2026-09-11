@@ -10,12 +10,16 @@ import {
   XCircle, 
   Search,
   Tag,
-  AlertCircle
+  AlertCircle,
+  Store
 } from "lucide-react";
 import ProductModal, { ProductData } from "./ProductModal";
 
 interface Product {
   id: number;
+  store_id?: number;
+  store_name?: string;
+  subdomain?: string;
   name: string;
   description: string;
   price: number | string;
@@ -35,15 +39,23 @@ export default function ProductManagement({
   onRefresh,
 }: ProductManagementProps) {
   const [search, setSearch] = useState("");
+  const [storeFilter, setStoreFilter] = useState<string>("all");
   const [modalOpen, setModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<ProductData | null>(null);
   const [isDeleting, setIsDeleting] = useState<number | null>(null);
 
-  const filtered = products.filter(
-    (p) =>
+  const filtered = products.filter((p) => {
+    const matchesStore =
+      storeFilter === "all" ||
+      (storeFilter === "3nfm" && (p.subdomain === "3nfm" || p.store_id === 3)) ||
+      (storeFilter === "apex" && (p.subdomain === "apex" || p.store_id === 1));
+
+    const matchesSearch =
       p.name.toLowerCase().includes(search.toLowerCase()) ||
-      (p.category && p.category.toLowerCase().includes(search.toLowerCase()))
-  );
+      (p.category && p.category.toLowerCase().includes(search.toLowerCase()));
+
+    return matchesStore && matchesSearch;
+  });
 
   const handleOpenCreate = () => {
     setEditingProduct(null);
@@ -53,6 +65,7 @@ export default function ProductManagement({
   const handleOpenEdit = (product: Product) => {
     setEditingProduct({
       id: product.id,
+      store_id: product.store_id,
       name: product.name,
       description: product.description || "",
       price: product.price,
@@ -97,11 +110,33 @@ export default function ProductManagement({
             </h3>
           </div>
           <p className="font-sans text-xs text-[#EEEFF2]/60">
-            รายการสินค้าทั้งหมด {products.length} รายการในคลังสินค้า
+            รายการสินค้าทั้งหมด {products.length} รายการในคลังสินค้าทุกร้านค้า
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
+          {/* Store Filter Pills */}
+          <div className="flex items-center gap-1 p-1 rounded-xl bg-[#010101]/60 border border-[#EEEFF2]/10 font-sans text-xs">
+            {[
+              { id: "all", label: "ทุกร้าน" },
+              { id: "3nfm", label: "3NFM" },
+              { id: "apex", label: "Apex" },
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setStoreFilter(tab.id)}
+                className={`px-3 py-1.5 rounded-lg text-xs transition-all cursor-pointer ${
+                  storeFilter === tab.id
+                    ? "bg-[#272835] text-[#EEEFF2] font-semibold border border-[#EEEFF2]/20 shadow-sm"
+                    : "text-[#EEEFF2]/60 hover:text-[#EEEFF2]"
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
           {/* Search Box */}
           <div className="relative">
             <Search className="w-3.5 h-3.5 text-[#EEEFF2]/40 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
@@ -131,7 +166,7 @@ export default function ProductManagement({
         <table className="w-full text-left font-sans text-xs">
           <thead>
             <tr className="border-b border-[#EEEFF2]/10 text-[#EEEFF2]/50 font-mono text-[11px] uppercase tracking-wider">
-              <th className="pb-3 pr-4">สินค้า</th>
+              <th className="pb-3 pr-4">สินค้า &amp; ร้านค้า</th>
               <th className="pb-3 px-4">หมวดหมู่</th>
               <th className="pb-3 px-4 text-right">ราคา</th>
               <th className="pb-3 px-4 text-center">สต็อก</th>
@@ -151,6 +186,7 @@ export default function ProductManagement({
                 const numPrice =
                   typeof item.price === "string" ? parseFloat(item.price) : item.price;
                 const isAvail = Boolean(item.is_available);
+                const isStore3NFM = item.subdomain === "3nfm" || item.store_id === 3;
 
                 return (
                   <tr key={item.id} className="hover:bg-[#010101]/30 transition-colors">
@@ -172,8 +208,19 @@ export default function ProductManagement({
                           <div className="font-semibold text-[#EEEFF2] leading-snug line-clamp-1">
                             {item.name}
                           </div>
-                          <div className="font-mono text-[10px] text-[#EEEFF2]/40">
-                            ID: #{item.id}
+                          <div className="flex items-center gap-2 mt-0.5">
+                            <span
+                              className={`font-mono text-[10px] px-1.5 py-0.2 rounded border ${
+                                isStore3NFM
+                                  ? "bg-amber-950/70 text-amber-400 border-amber-500/30"
+                                  : "bg-sky-950/70 text-sky-400 border-sky-500/30"
+                              }`}
+                            >
+                              {isStore3NFM ? "3NFM" : "Apex"}
+                            </span>
+                            <span className="font-mono text-[10px] text-[#EEEFF2]/40">
+                              ID: #{item.id}
+                            </span>
                           </div>
                         </div>
                       </div>

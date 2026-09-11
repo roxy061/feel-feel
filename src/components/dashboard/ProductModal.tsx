@@ -1,10 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X, Package, Tag, DollarSign, Layers, ImageIcon, FileText, CheckCircle2, Loader2 } from "lucide-react";
+import { X, Package, Tag, DollarSign, Layers, ImageIcon, FileText, CheckCircle2, Loader2, Store } from "lucide-react";
 
 export interface ProductData {
   id?: number;
+  store_id?: number;
   name: string;
   description: string;
   price: number | string;
@@ -27,6 +28,7 @@ export default function ProductModal({
   onClose,
   onSaved,
 }: ProductModalProps) {
+  const [storeId, setStoreId] = useState(1);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
@@ -40,6 +42,7 @@ export default function ProductModal({
 
   useEffect(() => {
     if (product) {
+      setStoreId(product.store_id || 1);
       setName(product.name || "");
       setDescription(product.description || "");
       setPrice(String(product.price || ""));
@@ -48,6 +51,7 @@ export default function ProductModal({
       setImageUrl(product.image_url || "");
       setIsAvailable(Boolean(product.is_available));
     } else {
+      setStoreId(1);
       setName("");
       setDescription("");
       setPrice("");
@@ -74,6 +78,7 @@ export default function ProductModal({
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          store_id: storeId,
           name: name.trim(),
           description: description.trim(),
           price: parseFloat(price) || 0,
@@ -132,6 +137,24 @@ export default function ProductModal({
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Store Selector */}
+          {!product?.id && (
+            <div>
+              <label className="flex items-center gap-1.5 font-sans text-xs font-medium text-[#EEEFF2]/80 mb-1">
+                <Store className="w-3.5 h-3.5 text-sky-400" />
+                <span>เลือกร้านค้าสำหรับสินค้านี้</span>
+              </label>
+              <select
+                value={storeId}
+                onChange={(e) => setStoreId(Number(e.target.value))}
+                className="w-full px-3.5 py-2.5 rounded-xl bg-[#010101] border border-[#EEEFF2]/20 font-sans text-xs text-[#EEEFF2] focus:outline-none focus:border-[#EEEFF2] cursor-pointer"
+              >
+                <option value={1}>Apex Performance (Subdomain: /apex)</option>
+                <option value={3}>3NFM Motorsport Lab (Subdomain: /3nfm)</option>
+              </select>
+            </div>
+          )}
+
           <div>
             <label className="block font-sans text-xs font-medium text-[#EEEFF2]/80 mb-1">
               ชื่อสินค้า
