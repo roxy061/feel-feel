@@ -74,6 +74,40 @@ export async function POST(req: NextRequest) {
       [store.id]
     );
 
+    // บันทึกประวัติการใช้โทเคนลงใน wallet_transactions
+    try {
+      let wallets = await query<any[]>(
+        "SELECT id FROM wallets WHERE store_id = ? LIMIT 1",
+        [store.id]
+      );
+      let walletId: number;
+      if (!wallets || wallets.length === 0) {
+        const insWallet = await query<any>(
+          "INSERT INTO wallets (store_id, balance) VALUES (?, 0.0000)",
+          [store.id]
+        );
+        walletId = insWallet.insertId;
+      } else {
+        walletId = wallets[0].id;
+      }
+      const referenceId = `RENEW-${Date.now()}-${store.id}`;
+      await query(
+        `INSERT INTO wallet_transactions (
+          wallet_id, amount, type, description, reference_id, status
+        ) VALUES (?, ?, ?, ?, ?, ?)`,
+        [
+          walletId,
+          1.0,
+          "token_deduction",
+          `ต่ออายุร้านค้า ${store.name} (+30 วัน) หัก 1 โทเคน`,
+          referenceId,
+          "completed",
+        ]
+      );
+    } catch (txErr) {
+      console.warn("[Wallet Transaction Log Warning]:", txErr);
+    }
+
     // 5. ดึงข้อมูลใหม่เพื่อตอบกลับ
     const updatedStore = await query<any[]>(
       "SELECT expires_at, status FROM stores WHERE id = ? LIMIT 1",

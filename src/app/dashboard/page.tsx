@@ -78,7 +78,7 @@ export default function DashboardPage() {
         store: {
           ...overviewData.store,
           expires_at: newExpiresAt,
-          status: "Active",
+          status: "active",
           days_remaining: Math.max(
             1,
             Math.ceil(
@@ -86,6 +86,11 @@ export default function DashboardPage() {
             )
           ),
         },
+        all_stores: (overviewData.all_stores || []).map((s: any) =>
+          s.id === overviewData.store?.id || s.id === activeStoreId
+            ? { ...s, expires_at: newExpiresAt, is_active: true, is_expired: false }
+            : s
+        ),
       });
     }
   };

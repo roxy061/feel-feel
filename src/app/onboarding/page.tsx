@@ -117,7 +117,7 @@ export default function OnboardingPage() {
 
     setIsSubmitting(true);
     try {
-      const res = await fetch("/api/stores/create", {
+      const res = await fetch("/api/stores/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

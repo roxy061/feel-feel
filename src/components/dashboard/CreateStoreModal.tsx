@@ -102,7 +102,7 @@ export default function CreateStoreModal() {
 
     setIsSubmitting(true);
     try {
-      const res = await fetch("/api/merchant/stores", {
+      const res = await fetch("/api/stores/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -122,8 +122,9 @@ export default function CreateStoreModal() {
       }
 
       await refreshStores();
-      if (json.store?.id) {
-        setActiveStoreId(json.store.id);
+      const createdId = json.data?.store_id || json.store?.id;
+      if (createdId) {
+        setActiveStoreId(createdId);
       }
 
       // รีเซ็ตฟอร์มและปิด Modal

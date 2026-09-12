@@ -20,6 +20,8 @@ import {
   RefreshCw,
   Video,
   Image as ImageIcon,
+  Bell,
+  Send,
 } from "lucide-react";
 import { useStore } from "@/context/StoreContext";
 
@@ -34,6 +36,7 @@ interface StoreDetail {
   banner_url: string | null;
   truemoney_phone: string | null;
   promptpay_number: string | null;
+  telegram_chat_id: string | null;
   expires_at: string | null;
   status: string;
   is_expired: boolean;
@@ -65,6 +68,7 @@ export default function StoreSettingsPage() {
   const [decorativeText, setDecorativeText] = useState("");
   const [truemoneyPhone, setTruemoneyPhone] = useState("");
   const [promptpayNumber, setPromptpayNumber] = useState("");
+  const [telegramChatId, setTelegramChatId] = useState("");
   const [videoUrl, setVideoUrl] = useState("");
   const [bannerUrl, setBannerUrl] = useState("");
 
@@ -86,6 +90,7 @@ export default function StoreSettingsPage() {
         setDecorativeText(json.store.decorative_text || "");
         setTruemoneyPhone(json.store.truemoney_phone || "");
         setPromptpayNumber(json.store.promptpay_number || "");
+        setTelegramChatId(json.store.telegram_chat_id || "");
         setVideoUrl(json.store.video_url || "");
         setBannerUrl(json.store.banner_url || "");
       } else {
@@ -128,6 +133,7 @@ export default function StoreSettingsPage() {
           decorative_text: decorativeText.trim(),
           truemoney_phone: truemoneyPhone.trim(),
           promptpay_number: promptpayNumber.trim(),
+          telegram_chat_id: telegramChatId.trim() || null,
           video_url: videoUrl.trim() || null,
           banner_url: bannerUrl.trim() || null,
         }),
@@ -446,7 +452,50 @@ export default function StoreSettingsPage() {
           </div>
         </div>
 
-        {/* Section 3: Media & Background Assets */}
+        {/* Section 3: Telegram Real-Time Notifications */}
+        <div className="p-6 sm:p-8 rounded-xl bg-[#090A0F] border border-[#EEEFF2]/15 space-y-5">
+          <div className="flex items-center gap-2 border-b border-[#EEEFF2]/10 pb-3">
+            <Send className="w-4 h-4 text-sky-400" />
+            <h2 className="font-bebas text-xl tracking-wide text-[#EEEFF2]">
+              การแจ้งเตือนคำสั่งซื้อผ่าน TELEGRAM (REAL-TIME NOTIFICATIONS)
+            </h2>
+          </div>
+
+          <div>
+            <label className="block font-sans text-xs font-semibold text-[#EEEFF2] uppercase tracking-wider mb-2">
+              Telegram Chat ID ของร้านค้านี้ (Target Chat ID)
+            </label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#EEEFF2]/40">
+                <Send className="w-4 h-4 text-sky-400" />
+              </div>
+              <input
+                type="text"
+                value={telegramChatId}
+                onChange={(e) => setTelegramChatId(e.target.value)}
+                placeholder="เช่น -1001234567890 (กลุ่ม) หรือ 123456789 (แชทส่วนตัว)"
+                className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-[#272835]/60 border border-[#EEEFF2]/20 text-[#EEEFF2] font-mono text-xs focus:outline-none focus:border-sky-400 transition-colors"
+              />
+            </div>
+            <div className="mt-2.5 p-3 rounded-xl bg-[#272835]/30 border border-[#EEEFF2]/10 font-sans text-[11px] text-[#EEEFF2]/65 leading-relaxed space-y-1">
+              <div className="font-semibold text-[#EEEFF2]/90 flex items-center gap-1.5">
+                <Bell className="w-3.5 h-3.5 text-sky-400" />
+                <span>คำแนะนำการตั้งค่า Telegram Bot แจ้งเตือน:</span>
+              </div>
+              <div>
+                1. เชิญ Telegram Bot ของแพลตฟอร์มเข้ากลุ่มของร้านค้า หรือพิมพ์ข้อความหา Bot โดยตรง
+              </div>
+              <div>
+                2. ค้นหา Chat ID โดยใช้บอท เช่น <code>@userinfobot</code> หรือ <code>@RawDataBot</code> แล้วนำรหัสตัวเลขมาวางในช่องนี้
+              </div>
+              <div>
+                3. หากเว้นว่างไว้ ระบบจะส่งการแจ้งเตือนเข้าห้อง Chat ID กลางของแพลตฟอร์ม 3NFM โดยอัตโนมัติ
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Section 4: Media & Background Assets */}
         <div className="p-6 sm:p-8 rounded-xl bg-[#090A0F] border border-[#EEEFF2]/15 space-y-5">
           <div className="flex items-center gap-2 border-b border-[#EEEFF2]/10 pb-3">
             <Video className="w-4 h-4 text-purple-400" />

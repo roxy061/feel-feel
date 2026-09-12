@@ -12,14 +12,14 @@ export async function GET(req: NextRequest) {
     const storeIdParam = searchParams.get("store_id");
 
     let allStores = await query<any[]>(
-      "SELECT id, subdomain, name, description, tagline, decorative_text, video_url, banner_url, truemoney_phone, promptpay_number, expires_at, status, created_at FROM stores WHERE user_id = ? OR id IN (1, 2, 3) ORDER BY id ASC",
+      "SELECT id, subdomain, name, description, tagline, decorative_text, video_url, banner_url, truemoney_phone, promptpay_number, telegram_chat_id, expires_at, status, created_at FROM stores WHERE user_id = ? OR id IN (1, 2, 3) ORDER BY id ASC",
       [userId]
     );
 
     if (!allStores || allStores.length === 0) {
       await ensureDatabaseSeeded();
       allStores = await query<any[]>(
-        "SELECT id, subdomain, name, description, tagline, decorative_text, video_url, banner_url, truemoney_phone, promptpay_number, expires_at, status, created_at FROM stores WHERE user_id = ? OR id IN (1, 2, 3) ORDER BY id ASC",
+        "SELECT id, subdomain, name, description, tagline, decorative_text, video_url, banner_url, truemoney_phone, promptpay_number, telegram_chat_id, expires_at, status, created_at FROM stores WHERE user_id = ? OR id IN (1, 2, 3) ORDER BY id ASC",
         [userId]
       );
     }
@@ -87,6 +87,7 @@ export async function PUT(req: NextRequest) {
       decorative_text,
       truemoney_phone,
       promptpay_number,
+      telegram_chat_id,
       video_url,
       banner_url,
     } = body;
@@ -120,6 +121,7 @@ export async function PUT(req: NextRequest) {
         decorative_text = ?,
         truemoney_phone = ?,
         promptpay_number = ?,
+        telegram_chat_id = ?,
         video_url = ?,
         banner_url = ?
        WHERE id = ?`,
@@ -130,6 +132,7 @@ export async function PUT(req: NextRequest) {
         (decorative_text || cleanName.toUpperCase()).trim(),
         (truemoney_phone || "").trim(),
         (promptpay_number || "").trim(),
+        (telegram_chat_id || "").trim() || null,
         video_url || null,
         banner_url || null,
         store_id,
@@ -138,7 +141,7 @@ export async function PUT(req: NextRequest) {
 
     // ดึงข้อมูลที่อัปเดตแล้วกลับไป
     const updated = await query<any[]>(
-      "SELECT id, subdomain, name, description, tagline, decorative_text, video_url, banner_url, truemoney_phone, promptpay_number, expires_at, status FROM stores WHERE id = ? LIMIT 1",
+      "SELECT id, subdomain, name, description, tagline, decorative_text, video_url, banner_url, truemoney_phone, promptpay_number, telegram_chat_id, expires_at, status FROM stores WHERE id = ? LIMIT 1",
       [store_id]
     );
 

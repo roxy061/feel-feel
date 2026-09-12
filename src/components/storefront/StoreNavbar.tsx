@@ -1,6 +1,6 @@
 "use client";
 
-import { Store, ShoppingBag, ArrowLeft, LayoutDashboard, ArrowRightLeft } from "lucide-react";
+import { Store, ShoppingBag, ArrowLeft, LayoutDashboard, ArrowRightLeft, Truck } from "lucide-react";
 import Link from "next/link";
 
 interface StoreNavbarProps {
@@ -43,11 +43,22 @@ export default function StoreNavbar({
         </div>
 
         {/* Right: Actions */}
-        <div className="flex items-center gap-2.5 sm:gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
+          {/* Link to Order Tracking */}
+          <Link
+            href={`/${subdomain}/track`}
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#272835]/70 hover:bg-[#272835] border border-[#EEEFF2]/15 text-xs text-[#EEEFF2] transition-all font-sans"
+            title="ค้นหาและติดตามสถานะคำสั่งซื้อ"
+          >
+            <Truck className="w-3.5 h-3.5 text-amber-400" />
+            <span className="hidden sm:inline">ติดตามสถานะ</span>
+            <span className="sm:hidden">Track</span>
+          </Link>
+
           {/* Switch to alternate store */}
           <Link
             href={alternateStore.path}
-            className="hidden md:inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-[#272835]/50 hover:bg-[#272835] border border-[#EEEFF2]/10 text-xs text-[#EEEFF2]/75 hover:text-white transition-all font-sans"
+            className="hidden lg:inline-flex items-center gap-1 px-3 py-2 rounded-xl bg-[#272835]/50 hover:bg-[#272835] border border-[#EEEFF2]/10 text-xs text-[#EEEFF2]/75 hover:text-white transition-all font-sans"
             title={`สลับไปร้าน ${alternateStore.name}`}
           >
             <ArrowRightLeft className="w-3.5 h-3.5 text-sky-400" />
@@ -57,30 +68,25 @@ export default function StoreNavbar({
           {/* Link to Merchant Dashboard */}
           <Link
             href="/dashboard"
-            className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#272835]/70 hover:bg-[#272835] border border-[#EEEFF2]/15 text-xs text-[#EEEFF2] transition-all font-sans"
+            className="hidden sm:inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#272835]/70 hover:bg-[#272835] border border-[#EEEFF2]/15 text-xs text-[#EEEFF2] transition-all font-sans"
           >
             <LayoutDashboard className="w-3.5 h-3.5 text-emerald-400" />
             <span>Merchant Suite</span>
           </Link>
 
-          {/* Cart Button linking to Products Catalog */}
-          <a
-            href="#products-catalog"
-            onClick={(e) => {
-              if (onOpenCart) {
-                e.preventDefault();
-                onOpenCart();
-              }
-            }}
-            className="relative flex items-center gap-2 px-4 py-2 rounded-xl bg-[#EEEFF2] hover:bg-[#EEEFF2]/90 text-[#010101] text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer"
-            aria-label="View Shopping Catalog"
+          {/* Cart Button */}
+          <button
+            type="button"
+            onClick={onOpenCart}
+            className="relative flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-xl bg-[#EEEFF2] hover:bg-[#EEEFF2]/90 text-[#010101] text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer"
+            aria-label="Open Shopping Cart"
           >
             <ShoppingBag className="w-4 h-4 text-[#010101]" />
-            <span>เลือกซื้อสินค้า</span>
-            <span className="font-mono text-[11px] px-1.5 py-0.5 rounded-md bg-[#010101] text-[#EEEFF2]">
-              {cartCount > 0 ? cartCount : "6"}
+            <span className="hidden sm:inline">ตะกร้า</span>
+            <span className="font-mono text-[11px] px-1.5 py-0.5 rounded-md bg-[#010101] text-[#EEEFF2] font-bold">
+              {cartCount}
             </span>
-          </a>
+          </button>
         </div>
       </div>
     </header>

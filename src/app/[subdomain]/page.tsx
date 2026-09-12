@@ -8,6 +8,7 @@ import StoreNavbar from "@/components/storefront/StoreNavbar";
 import HeroSection from "@/components/storefront/HeroSection";
 import ProductGrid from "@/components/storefront/ProductGrid";
 import StoreFooter from "@/components/storefront/StoreFooter";
+import StorefrontClientWrapper from "@/components/storefront/StorefrontClientWrapper";
 
 export const dynamic = "force-dynamic";
 
@@ -310,6 +311,16 @@ export default async function TenantStorePage({ params }: TenantStorePageProps) 
     (store.expires_at ? new Date(store.expires_at) < now : false);
 
   if (isExpired) {
+    // อัปเดตสถานะในตาราง stores เป็น 'expired' อัตโนมัติในฐานข้อมูล
+    if (store.status !== "expired" && store.id) {
+      try {
+        await query("UPDATE stores SET status = 'expired' WHERE id = ?", [store.id]);
+        store.status = "expired";
+      } catch (updateErr) {
+        console.warn(`[Auto-Expire Warning] Failed to update store status to expired for store ${store.id}:`, updateErr);
+      }
+    }
+
     return (
       <div className="min-h-[100dvh] bg-[#010101] text-[#EEEFF2] flex flex-col justify-between selection:bg-[#272835] selection:text-[#EEEFF2]">
         <StoreNavbar storeName={store.name} subdomain={store.subdomain} cartCount={0} />
@@ -378,27 +389,6 @@ export default async function TenantStorePage({ params }: TenantStorePageProps) 
   }
 
   return (
-    <div className="min-h-[100dvh] bg-[#010101] text-[#EEEFF2] flex flex-col justify-between selection:bg-[#272835] selection:text-[#EEEFF2]">
-      {/* Navbar ด้านบน พร้อมชื่อร้านและ Cart Icon จาก Lucide */}
-      <StoreNavbar storeName={store.name} subdomain={store.subdomain} cartCount={products.length} />
-
-      {/* Hero Section สไตล์ New Era Automotive Hero ตามข้อกำหนดใน design.md */}
-      <HeroSection
-        storeName={store.name}
-        description={store.description}
-        tagline={store.tagline}
-        decorativeText={store.decorative_text}
-        videoUrl={store.video_url}
-        bannerUrl={store.banner_url}
-      />
-
-      {/* Products Grid: Responsive Grid พร้อมการ์ด #272835 และปุ่มสั่งซื้อสินค้า */}
-      <main className="flex-1 w-full">
-        <ProductGrid products={products} storeName={store.name} storeId={store.id} />
-      </main>
-
-      {/* Store Footer */}
-      <StoreFooter storeName={store.name} subdomain={store.subdomain} />
-    </div>
+    <StorefrontClientWrapper store={store} products={products} />
   );
 }

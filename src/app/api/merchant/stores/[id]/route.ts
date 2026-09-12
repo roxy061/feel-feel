@@ -17,7 +17,7 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
 
     let stores = await query<any[]>(
       `SELECT id, subdomain, name, description, tagline, decorative_text, 
-              video_url, banner_url, truemoney_phone, promptpay_number, 
+              video_url, banner_url, truemoney_phone, promptpay_number, telegram_chat_id,
               expires_at, status, created_at 
        FROM stores 
        WHERE id = ? LIMIT 1`,
@@ -28,7 +28,7 @@ export async function GET(req: NextRequest, { params }: RouteParams) {
       await ensureDatabaseSeeded();
       stores = await query<any[]>(
         `SELECT id, subdomain, name, description, tagline, decorative_text, 
-                video_url, banner_url, truemoney_phone, promptpay_number, 
+                video_url, banner_url, truemoney_phone, promptpay_number, telegram_chat_id,
                 expires_at, status, created_at 
          FROM stores 
          WHERE id = ? LIMIT 1`,
@@ -89,6 +89,7 @@ export async function PUT(req: NextRequest, { params }: RouteParams) {
       decorative_text,
       truemoney_phone,
       promptpay_number,
+      telegram_chat_id,
       video_url,
       banner_url,
     } = body;
@@ -121,6 +122,7 @@ export async function PUT(req: NextRequest, { params }: RouteParams) {
         decorative_text = ?,
         truemoney_phone = ?,
         promptpay_number = ?,
+        telegram_chat_id = ?,
         video_url = ?,
         banner_url = ?
        WHERE id = ?`,
@@ -131,6 +133,7 @@ export async function PUT(req: NextRequest, { params }: RouteParams) {
         (decorative_text || cleanName.toUpperCase()).trim(),
         (truemoney_phone || "").trim(),
         (promptpay_number || "").trim(),
+        (telegram_chat_id || "").trim() || null,
         video_url || null,
         banner_url || null,
         storeId,
@@ -139,7 +142,7 @@ export async function PUT(req: NextRequest, { params }: RouteParams) {
 
     const updated = await query<any[]>(
       `SELECT id, subdomain, name, description, tagline, decorative_text, 
-              video_url, banner_url, truemoney_phone, promptpay_number, 
+              video_url, banner_url, truemoney_phone, promptpay_number, telegram_chat_id,
               expires_at, status 
        FROM stores 
        WHERE id = ? LIMIT 1`,

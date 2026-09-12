@@ -8,17 +8,21 @@ import {
   Tag, 
   Search, 
   SlidersHorizontal,
-  PackageCheck
+  PackageCheck,
+  Plus
 } from "lucide-react";
 import OrderModal, { ProductItem } from "./OrderModal";
+import { useCart } from "@/context/CartContext";
 
 interface ProductGridProps {
   products: ProductItem[];
   storeName: string;
   storeId: number | string;
+  subdomain?: string;
 }
 
-export default function ProductGrid({ products, storeName, storeId }: ProductGridProps) {
+export default function ProductGrid({ products, storeName, storeId, subdomain }: ProductGridProps) {
+  const { addToCart } = useCart();
   const [selectedProduct, setSelectedProduct] = useState<ProductItem | null>(null);
   const [activeCategory, setActiveCategory] = useState<string>("ALL");
   const [searchQuery, setSearchQuery] = useState("");
@@ -169,19 +173,36 @@ export default function ProductGrid({ products, storeName, storeId }: ProductGri
                       </div>
                     </div>
 
-                    <button
-                      type="button"
-                      disabled={!inStock}
-                      onClick={() => setSelectedProduct(product)}
-                      className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-sans text-xs font-bold transition-all shadow-md active:scale-95 ${
-                        inStock
-                          ? "bg-[#EEEFF2] hover:bg-[#EEEFF2]/90 text-[#010101] cursor-pointer"
-                          : "bg-[#010101]/60 text-[#EEEFF2]/40 border border-[#EEEFF2]/10 cursor-not-allowed"
-                      }`}
-                    >
-                      <ShoppingBag className="w-3.5 h-3.5" />
-                      <span>สั่งซื้อสินค้า</span>
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        disabled={!inStock}
+                        onClick={() => addToCart(product, 1)}
+                        className={`p-2.5 rounded-xl border transition-all ${
+                          inStock
+                            ? "bg-[#272835] hover:bg-[#343647] text-[#EEEFF2] border-[#EEEFF2]/15 hover:border-amber-400/50 cursor-pointer active:scale-95"
+                            : "bg-[#010101]/40 text-[#EEEFF2]/20 border-[#EEEFF2]/10 cursor-not-allowed"
+                        }`}
+                        title="หยิบใส่ตะกร้า"
+                        aria-label="Add to cart"
+                      >
+                        <Plus className="w-4 h-4" />
+                      </button>
+
+                      <button
+                        type="button"
+                        disabled={!inStock}
+                        onClick={() => setSelectedProduct(product)}
+                        className={`inline-flex items-center gap-1.5 px-3.5 sm:px-4 py-2.5 rounded-xl font-sans text-xs font-bold transition-all shadow-md active:scale-95 ${
+                          inStock
+                            ? "bg-[#EEEFF2] hover:bg-[#EEEFF2]/90 text-[#010101] cursor-pointer"
+                            : "bg-[#010101]/60 text-[#EEEFF2]/40 border border-[#EEEFF2]/10 cursor-not-allowed"
+                        }`}
+                      >
+                        <ShoppingBag className="w-3.5 h-3.5" />
+                        <span>ซื้อทันที</span>
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -195,6 +216,7 @@ export default function ProductGrid({ products, storeName, storeId }: ProductGri
         product={selectedProduct}
         storeName={storeName}
         storeId={storeId}
+        subdomain={subdomain}
         onClose={() => setSelectedProduct(null)}
       />
     </section>

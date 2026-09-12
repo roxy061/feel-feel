@@ -31,6 +31,10 @@ export async function GET(req: NextRequest) {
           o.slip_url,
           o.payment_status,
           o.status,
+          o.tracking_number,
+          o.courier,
+          o.shipping_status,
+          o.items_json,
           o.created_at
          FROM orders o
          LEFT JOIN products p ON o.product_id = p.id
@@ -57,6 +61,10 @@ export async function GET(req: NextRequest) {
           o.slip_url,
           o.payment_status,
           o.status,
+          o.tracking_number,
+          o.courier,
+          o.shipping_status,
+          o.items_json,
           o.created_at
          FROM orders o
          LEFT JOIN products p ON o.product_id = p.id

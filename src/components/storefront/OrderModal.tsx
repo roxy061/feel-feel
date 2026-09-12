@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
+import Link from "next/link";
 import { 
   X, 
   ShoppingBag, 
@@ -18,8 +19,12 @@ import {
   Trash2,
   Copy,
   Check,
-  ImageIcon
+  ImageIcon,
+  FileText,
+  Truck,
+  ExternalLink
 } from "lucide-react";
+import { CartItem } from "@/context/CartContext";
 
 export interface ProductItem {
   id: number | string;
@@ -32,10 +37,13 @@ export interface ProductItem {
 }
 
 interface OrderModalProps {
-  product: ProductItem | null;
+  product?: ProductItem | null;
+  cartItems?: CartItem[] | null;
   storeName: string;
   storeId: number | string;
+  subdomain?: string;
   onClose: () => void;
+  onOrderSuccess?: () => void;
 }
 
 interface OrderSuccessData {
@@ -54,10 +62,14 @@ interface OrderSuccessData {
 
 export default function OrderModal({
   product,
+  cartItems,
   storeName,
   storeId,
+  subdomain,
   onClose,
+  onOrderSuccess,
 }: OrderModalProps) {
+  const isCartCheckout = Array.isArray(cartItems) && cartItems.length > 0;
   const [paymentMethod, setPaymentMethod] = useState<"truemoney" | "bank_transfer">("truemoney");
   const [quantity, setQuantity] = useState(1);
   const [customerName, setCustomerName] = useState("");
@@ -76,10 +88,19 @@ export default function OrderModal({
   const [orderSuccess, setOrderSuccess] = useState<OrderSuccessData | null>(null);
   const [isCopied, setIsCopied] = useState(false);
 
-  if (!product) return null;
+  if (!product && !isCartCheckout) return null;
 
-  const numPrice = typeof product.price === "string" ? parseFloat(product.price) : product.price;
-  const totalPrice = numPrice * quantity;
+  const numPrice = product 
+    ? (typeof product.price === "string" ? parseFloat(product.price) : product.price)
+    : 0;
+
+  const totalPrice = isCartCheckout
+    ? (cartItems || []).reduce((sum, item) => sum + (item.price * item.quantity), 0)
+    : numPrice * quantity;
+
+  const totalQuantity = isCartCheckout
+    ? (cartItems || []).reduce((sum, item) => sum + item.quantity, 0)
+    : quantity;
 
   const handleCopyOrderNumber = (orderNum: string) => {
     navigator.clipboard.writeText(orderNum);
@@ -147,22 +168,35 @@ export default function OrderModal({
     setIsLoading(true);
 
     try {
+      const payload: any = {
+        store_id: storeId,
+        customer_name: customerName.trim() || "ลูกค้าทั่วไป",
+        customer_contact: customerContact.trim(),
+        customer_address: customerAddress.trim(),
+        payment_method: paymentMethod,
+        voucher_url: paymentMethod === "truemoney" ? voucherUrl.trim() : undefined,
+        slip_image: paymentMethod === "bank_transfer" ? slipBase64 : undefined,
+      };
+
+      if (isCartCheckout && cartItems) {
+        payload.items = cartItems.map((item) => ({
+          product_id: item.id,
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity,
+          image_url: item.image_url,
+        }));
+      } else if (product) {
+        payload.product_id = product.id;
+        payload.quantity = quantity;
+      }
+
       const response = await fetch("/api/orders", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          store_id: storeId,
-          product_id: product.id,
-          customer_name: customerName.trim() || "ลูกค้าทั่วไป",
-          customer_contact: customerContact.trim(),
-          customer_address: customerAddress.trim(),
-          quantity,
-          payment_method: paymentMethod,
-          voucher_url: paymentMethod === "truemoney" ? voucherUrl.trim() : undefined,
-          slip_image: paymentMethod === "bank_transfer" ? slipBase64 : undefined,
-        }),
+        body: JSON.stringify(payload),
       });
 
       const data = await response.json();
@@ -172,6 +206,9 @@ export default function OrderModal({
       }
 
       setOrderSuccess(data.order);
+      if (onOrderSuccess) {
+        onOrderSuccess();
+      }
     } catch (err: any) {
       setErrorMessage(err.message || "เกิดข้อผิดพลาดในการเชื่อมต่อระบบ");
     } finally {
@@ -275,6 +312,28 @@ export default function OrderModal({
               </div>
             </div>
 
+            {/* Action Buttons: Invoice & Track */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+              <a
+                href={`/receipt/${orderSuccess.order_number}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-[#010101] hover:bg-[#1a1a24] border border-[#EEEFF2]/20 font-sans font-semibold text-xs text-[#EEEFF2] transition-colors shadow-sm"
+              >
+                <FileText className="w-4 h-4 text-amber-400" />
+                <span>ดูใบเสร็จรับเงิน (Invoice)</span>
+                <ExternalLink className="w-3.5 h-3.5 text-[#EEEFF2]/40" />
+              </a>
+
+              <Link
+                href={subdomain ? `/${subdomain}/track?q=${orderSuccess.order_number}` : `/track?q=${orderSuccess.order_number}`}
+                className="flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-[#010101] hover:bg-[#1a1a24] border border-[#EEEFF2]/20 font-sans font-semibold text-xs text-[#EEEFF2] transition-colors shadow-sm"
+              >
+                <Truck className="w-4 h-4 text-sky-400" />
+                <span>ติดตามสถานะพัสดุ</span>
+              </Link>
+            </div>
+
             <button
               type="button"
               onClick={onClose}
@@ -337,44 +396,78 @@ export default function OrderModal({
               </div>
             )}
 
-            {/* Selected Product Summary */}
-            <div className="flex items-center justify-between p-3.5 rounded-xl bg-[#010101]/50 border border-[#EEEFF2]/15 mb-4">
-              <div className="flex-1 pr-3">
-                <div className="font-sans font-semibold text-sm text-[#EEEFF2] truncate">
-                  {product.name}
+            {/* Selected Product / Cart Summary */}
+            {isCartCheckout && cartItems ? (
+              <div className="rounded-xl bg-[#010101]/50 border border-[#EEEFF2]/15 p-3.5 mb-4">
+                <div className="flex items-center justify-between font-sans text-xs text-[#EEEFF2]/70 mb-2.5 pb-2 border-b border-[#EEEFF2]/10">
+                  <span>รายการสินค้าในตะกร้า ({cartItems.length} รายการ, {totalQuantity} ชิ้น)</span>
+                  <span className="font-mono text-emerald-400 font-bold">
+                    รวม {totalPrice.toLocaleString("th-TH", { minimumFractionDigits: 2 })} THB
+                  </span>
                 </div>
-                <div className="font-mono text-xs text-[#EEEFF2]/60 mt-0.5">
-                  คงเหลือ {product.stock} ชิ้น &bull; {product.category}
+                <div className="max-h-36 overflow-y-auto space-y-2 pr-1">
+                  {cartItems.map((item) => (
+                    <div key={item.id} className="flex items-center justify-between text-xs font-sans py-1">
+                      <div className="flex items-center gap-2 truncate pr-2">
+                        {item.image_url ? (
+                          <img src={item.image_url} alt={item.name} className="w-7 h-7 rounded object-cover border border-[#EEEFF2]/10 shrink-0" />
+                        ) : (
+                          <div className="w-7 h-7 rounded bg-[#272835] border border-[#EEEFF2]/10 flex items-center justify-center shrink-0">
+                            <ShoppingBag className="w-3.5 h-3.5 text-[#EEEFF2]/50" />
+                          </div>
+                        )}
+                        <span className="text-[#EEEFF2] truncate">{item.name}</span>
+                      </div>
+                      <div className="text-right shrink-0 font-mono text-[11px] text-[#EEEFF2]/70">
+                        <span>{item.quantity} x {item.price.toLocaleString("th-TH")} = </span>
+                        <span className="text-[#EEEFF2] font-medium">{(item.quantity * item.price).toLocaleString("th-TH")} THB</span>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
-              <div className="text-right">
-                <div className="font-mono text-base font-bold text-emerald-400">
-                  {numPrice.toLocaleString("th-TH", { minimumFractionDigits: 2 })} <span className="text-xs font-mono text-emerald-300">THB</span>
+            ) : product ? (
+              <div className="flex items-center justify-between p-3.5 rounded-xl bg-[#010101]/50 border border-[#EEEFF2]/15 mb-4">
+                <div className="flex-1 pr-3">
+                  <div className="font-sans font-semibold text-sm text-[#EEEFF2] truncate">
+                    {product.name}
+                  </div>
+                  <div className="font-mono text-xs text-[#EEEFF2]/60 mt-0.5">
+                    คงเหลือ {product.stock} ชิ้น &bull; {product.category}
+                  </div>
                 </div>
-              </div>
-            </div>
-
-            <form onSubmit={handleSubmitOrder} className="space-y-3.5">
-              {/* Quantity */}
-              <div className="flex items-center justify-between">
-                <label className="font-sans text-xs font-medium text-[#EEEFF2]/80">
-                  จำนวนที่ต้องการสั่งซื้อ:
-                </label>
-                <div className="flex items-center gap-3">
-                  <input
-                    type="number"
-                    min="1"
-                    max={Math.max(1, product.stock)}
-                    value={quantity}
-                    onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value, 10) || 1))}
-                    className="w-20 px-2.5 py-1.5 rounded-xl bg-[#010101] border border-[#EEEFF2]/20 font-mono text-sm text-[#EEEFF2] focus:outline-none focus:border-[#EEEFF2] text-center"
-                    required
-                  />
-                  <div className="font-mono text-xs text-[#EEEFF2]/80">
-                    รวม: <span className="text-emerald-400 font-bold">{totalPrice.toLocaleString("th-TH", { minimumFractionDigits: 2 })} บาท</span>
+                <div className="text-right">
+                  <div className="font-mono text-base font-bold text-emerald-400">
+                    {numPrice.toLocaleString("th-TH", { minimumFractionDigits: 2 })}{" "}
+                    <span className="text-xs font-mono text-emerald-300">THB</span>
                   </div>
                 </div>
               </div>
+            ) : null}
+
+            <form onSubmit={handleSubmitOrder} className="space-y-3.5">
+              {/* Quantity (Only shown for single product checkout) */}
+              {!isCartCheckout && product && (
+                <div className="flex items-center justify-between">
+                  <label className="font-sans text-xs font-medium text-[#EEEFF2]/80">
+                    จำนวนที่ต้องการสั่งซื้อ:
+                  </label>
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="number"
+                      min="1"
+                      max={Math.max(1, product.stock)}
+                      value={quantity}
+                      onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value, 10) || 1))}
+                      className="w-20 px-2.5 py-1.5 rounded-xl bg-[#010101] border border-[#EEEFF2]/20 font-mono text-sm text-[#EEEFF2] focus:outline-none focus:border-[#EEEFF2] text-center"
+                      required
+                    />
+                    <div className="font-mono text-xs text-[#EEEFF2]/80">
+                      รวม: <span className="text-emerald-400 font-bold">{totalPrice.toLocaleString("th-TH", { minimumFractionDigits: 2 })} บาท</span>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Customer Name */}
               <div>
@@ -557,7 +650,7 @@ export default function OrderModal({
               <div className="pt-2">
                 <button
                   type="submit"
-                  disabled={isLoading || product.stock < 1}
+                  disabled={isLoading || (!isCartCheckout && product ? product.stock < 1 : false)}
                   className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-[#EEEFF2] hover:bg-[#EEEFF2]/90 disabled:bg-[#272835] text-[#010101] disabled:text-[#EEEFF2]/40 font-semibold text-sm transition-all shadow-lg active:scale-95 cursor-pointer disabled:cursor-not-allowed"
                 >
                   {isLoading ? (

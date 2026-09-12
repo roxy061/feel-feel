@@ -147,6 +147,9 @@ async function runDatabaseSeed(): Promise<void> {
     await db.query("ALTER TABLE stores ADD COLUMN promptpay_number VARCHAR(50) DEFAULT '0812345678' AFTER truemoney_phone;");
   } catch {}
   try {
+    await db.query("ALTER TABLE stores ADD COLUMN telegram_chat_id VARCHAR(100) NULL AFTER promptpay_number;");
+  } catch {}
+  try {
     await db.query("ALTER TABLE stores ADD COLUMN expires_at DATETIME DEFAULT NULL AFTER promptpay_number;");
   } catch {}
   try {
@@ -205,6 +208,18 @@ async function runDatabaseSeed(): Promise<void> {
   }
   try {
     await db.query("ALTER TABLE orders ADD COLUMN payment_status VARCHAR(50) DEFAULT 'pending' AFTER slip_url;");
+  } catch {}
+  try {
+    await db.query("ALTER TABLE orders ADD COLUMN tracking_number VARCHAR(100) NULL AFTER status;");
+  } catch {}
+  try {
+    await db.query("ALTER TABLE orders ADD COLUMN courier VARCHAR(50) NULL AFTER tracking_number;");
+  } catch {}
+  try {
+    await db.query("ALTER TABLE orders ADD COLUMN shipping_status VARCHAR(50) DEFAULT 'unfulfilled' AFTER courier;");
+  } catch {}
+  try {
+    await db.query("ALTER TABLE orders ADD COLUMN items_json JSON NULL AFTER shipping_status;");
   } catch {}
 
   // 5. Create wallets table
@@ -427,4 +442,41 @@ export async function ensureDatabaseSeeded(): Promise<void> {
   })();
 
   return seedPromise;
+}
+
+export async function seedStarterMotorsportProducts(storeId: number, storeName: string): Promise<void> {
+  const defaultProducts = [
+    {
+      name: `${storeName} Dry-Carbon Aero Canard Kit`,
+      description: "ชุดคานาร์ดคาร์บอนไฟเบอร์เกรดแห้ง Dry Carbon เพิ่ม Downforce ด้านหน้าและเสถียรภาพการเข้าโค้งความเร็วสูง",
+      price: 6900.0,
+      stock: 10,
+      category: "Aero & Carbon",
+      image_url: "https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&w=800&q=80",
+    },
+    {
+      name: `${storeName} High-Flow Titanium Air Intake`,
+      description: "ชุดกรองอากาศคาร์บอนและท่อไทเทเนียม เพิ่มปริมาณอากาศเข้าสู่ห้องเผาไหม้และกักเก็บความเย็นเพื่อสมรรถนะสูงสุด",
+      price: 28000.0,
+      stock: 8,
+      category: "Exhaust & Intake",
+      image_url: "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=800&q=80",
+    },
+    {
+      name: `${storeName} Competition Monoblock Brake Kit`,
+      description: "ชุดคาลิปเปอร์เบรกโมโนบล็อกอะลูมิเนียมฟอร์จ พร้อมจานขยายเซาะร่อง ทนความร้อนสูง 800°C ตอบสนองฉับไว",
+      price: 54000.0,
+      stock: 5,
+      category: "Braking System",
+      image_url: "https://images.unsplash.com/photo-1600705722908-bab1e61c0b4d?auto=format&fit=crop&w=800&q=80",
+    },
+  ];
+
+  for (const prod of defaultProducts) {
+    await db.query(
+      `INSERT INTO products (store_id, name, description, price, stock, category, is_available, image_url)
+       VALUES (?, ?, ?, ?, ?, ?, 1, ?)`,
+      [storeId, prod.name, prod.description, prod.price, prod.stock, prod.category, prod.image_url]
+    );
+  }
 }

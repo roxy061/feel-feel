@@ -87,10 +87,9 @@ export default function StoreOverviewCard({
     setFeedback(null);
 
     try {
-      const res = await fetch("/api/merchant/renew", {
+      const res = await fetch(`/api/merchant/stores/${currentStore.id}/renew`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ store_id: currentStore.id }),
       });
       const result = await res.json();
 

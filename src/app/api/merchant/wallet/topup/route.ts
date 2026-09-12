@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { query } from "@/lib/db";
 import { ensureDatabaseSeeded } from "@/lib/auto-seed";
+import { sendTelegramAlert } from "@/lib/telegram";
 
 export async function POST(req: NextRequest) {
   try {
@@ -77,6 +78,49 @@ export async function POST(req: NextRequest) {
     );
 
     const newBalance = parseFloat(updatedWallets[0]?.balance || "0");
+
+    // ส่งข้อความแจ้งเตือนผ่าน Telegram Bot API (Non-blocking Asynchronous)
+    try {
+      const stores = await query<any[]>(
+        "SELECT name, subdomain FROM stores WHERE id = ? LIMIT 1",
+        [storeId]
+      );
+      const storeInfo =
+        stores && stores.length > 0
+          ? `${stores[0].name} (<code>@${stores[0].subdomain}</code>)`
+          : `Store ID: ${storeId}`;
+
+      const rootDomain = process.env.ROOT_DOMAIN || "localhost:3000";
+      const protocol = rootDomain.includes("localhost") ? "http" : "https";
+      const baseUrl = `${protocol}://${rootDomain}`;
+
+      const topupMsg = [
+        `<b>[ WALLET TOPUP ] แจ้งเตือนการเติมเงินเข้ากระเป๋าเงิน</b>`,
+        `<b>ผู้ดำเนินการ:</b> ${storeInfo}`,
+        `<b>รหัสอ้างอิง:</b> <code>${refId}</code>`,
+        `<b>เวลา:</b> <code>${new Date().toLocaleString("th-TH")}</code>`,
+        ``,
+        `<b>จำนวนเงินที่เติม:</b> <code>${amount.toLocaleString("th-TH", {
+          minimumFractionDigits: 2,
+        })} THB</code>`,
+        `<b>ยอดเงินคงเหลือใหม่:</b> <code>${newBalance.toLocaleString("th-TH", {
+          minimumFractionDigits: 2,
+        })} THB</code>`,
+        `<b>ช่องทาง:</b> โอนเงิน PromptPay QR (แนบสลิป)`,
+        ``,
+        `<b>ลิงก์ด่วน:</b>`,
+        `  [->] <a href="${baseUrl}/dashboard/wallet">ตรวจสอบกระเป๋าเงินและสถิติ</a>`,
+      ].join("\n");
+
+      sendTelegramAlert({
+        message: topupMsg,
+        base64Photo: slipUrl || null,
+      }).catch((tgErr) => {
+        console.warn("[Telegram Wallet Topup Alert Warning]:", tgErr?.message);
+      });
+    } catch (err: any) {
+      console.warn("[Telegram Topup Formatting Warning]:", err?.message);
+    }
 
     return NextResponse.json({
       success: true,
