@@ -102,11 +102,14 @@ export async function query<T = any>(
       error?.code === "ECONNRESET" ||
       error?.code === "PROTOCOL_CONNECTION_LOST" ||
       error?.code === "ETIMEDOUT" ||
+      error?.code === "ECONNREFUSED" ||
       error?.message?.includes("closed");
 
     if (isTransient) {
       try {
-        const [retryResults] = await db.query(sql, values);
+        // Re-create pool in case of stale connection
+        global.mysqlPool = mysql.createPool(poolConfig);
+        const [retryResults] = await global.mysqlPool.query(sql, values);
         return retryResults as T;
       } catch (retryErr) {
         throw retryErr;
