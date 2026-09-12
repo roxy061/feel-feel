@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { query } from "@/lib/db";
 
+export const dynamic = "force-dynamic";
+
 // PATCH: เปลี่ยนสถานะเปิด/ปิดการใช้งาน API Key
 export async function PATCH(
   req: NextRequest,

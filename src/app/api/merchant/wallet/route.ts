@@ -6,7 +6,9 @@ export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest) {
   try {
-    const storeId = 1;
+    const { searchParams } = new URL(req.url);
+    const storeIdParam = searchParams.get("store_id");
+    const storeId = storeIdParam ? parseInt(storeIdParam, 10) || 1 : 1;
     const userId = "u-001";
 
     // 1. ดึงข้อมูลกระเป๋าเงิน (Wallet) พร้อม Auto-Seed หากยังไม่มี

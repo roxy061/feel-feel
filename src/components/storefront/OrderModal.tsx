@@ -461,12 +461,12 @@ export default function OrderModal({
                     </span>
 
                     {/* QR Code Container */}
-                    <div className="w-48 h-48 mx-auto p-2 bg-white rounded-xl shadow-lg flex items-center justify-center my-2 border border-[#EEEFF2]/20">
+                    <div className="w-56 max-w-full mx-auto p-2 bg-white rounded-xl shadow-lg flex items-center justify-center my-2 border border-[#EEEFF2]/20">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src="/images/promptpay-qr.jpg"
                         alt="PromptPay QR Code"
-                        className="w-full h-full object-contain"
+                        className="w-full h-auto object-contain rounded-lg"
                       />
                     </div>
 
@@ -477,8 +477,8 @@ export default function OrderModal({
                       {totalPrice.toLocaleString("th-TH", { minimumFractionDigits: 2 })}{" "}
                       <span className="text-sm font-sans text-[#EEEFF2]/70 font-normal">บาท</span>
                     </div>
-                    <div className="font-mono text-[11px] text-[#EEEFF2]/50 mt-0.5">
-                      พร้อมเพย์: 081-234-5678 ({storeName})
+                    <div className="font-sans text-xs text-[#EEEFF2]/70 mt-1">
+                      บัญชีรับเงิน: <span className="font-semibold text-[#EEEFF2]">นาย ภคพล สมัยแก้ว</span> (KBank PromptPay)
                     </div>
                   </div>
 

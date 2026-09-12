@@ -10,9 +10,9 @@ const TOKEN_PACKAGES: Record<string, { tokens: number; cost: number; name: strin
 
 export async function POST(req: NextRequest) {
   try {
-    const storeId = 1;
-    const userId = "u-001";
     const body = await req.json().catch(() => null);
+    const storeId = body?.store_id ? parseInt(body.store_id, 10) || 1 : 1;
+    const userId = "u-001";
 
     if (!body || !body.package_id) {
       return NextResponse.json(

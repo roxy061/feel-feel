@@ -8,6 +8,7 @@ import OrderVerification from "@/components/dashboard/OrderVerification";
 
 export default function DashboardPage() {
   const [overviewData, setOverviewData] = useState<any | null>(null);
+  const [selectedStoreId, setSelectedStoreId] = useState<number | null>(null);
   const [products, setProducts] = useState<any[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -123,6 +124,8 @@ export default function DashboardPage() {
           <StoreOverviewCard
             data={overviewData}
             onRenewSuccess={handleRenewSuccess}
+            selectedStoreId={selectedStoreId || overviewData.store.id}
+            onSelectStore={(id) => setSelectedStoreId(id)}
           />
         )}
       </section>
@@ -131,6 +134,7 @@ export default function DashboardPage() {
       <section id="products">
         <ProductManagement
           products={products}
+          selectedStoreId={selectedStoreId || overviewData?.store?.id || 1}
           onRefresh={() => {
             fetchProducts();
             fetchOverview();

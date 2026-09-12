@@ -595,16 +595,16 @@ export default function WalletPage() {
 
               {/* QR Display */}
               <div className="p-4 rounded-xl bg-[#010101]/60 border border-[#EEEFF2]/15 text-center">
-                <div className="w-40 h-40 mx-auto p-2 bg-white rounded-xl shadow-lg flex items-center justify-center my-1">
+                <div className="w-56 max-w-full mx-auto p-2 bg-white rounded-xl shadow-lg flex items-center justify-center my-1">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src="/images/promptpay-qr.jpg"
                     alt="PromptPay QR"
-                    className="w-full h-full object-contain"
+                    className="w-full h-auto object-contain rounded-lg"
                   />
                 </div>
-                <div className="font-mono text-xs text-[#EEEFF2]/60 mt-2">
-                  พร้อมเพย์: 081-234-5678 (3NFM Platform)
+                <div className="font-sans text-xs text-[#EEEFF2]/70 mt-2">
+                  บัญชีรับเงิน: <span className="font-semibold text-[#EEEFF2]">นาย ภคพล สมัยแก้ว</span> (KBank PromptPay)
                 </div>
                 <div className="font-mono text-xl font-bold text-emerald-400 mt-1">
                   ยอดที่ต้องโอน: {parseFloat(topupAmount || "0").toLocaleString("th-TH", { minimumFractionDigits: 2 })} บาท

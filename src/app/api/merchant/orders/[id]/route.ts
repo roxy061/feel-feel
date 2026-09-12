@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { query } from "@/lib/db";
 
+export const dynamic = "force-dynamic";
+
 // PATCH: อนุมัติหรือปฏิเสธคำสั่งซื้อ
 export async function PATCH(
   req: NextRequest,

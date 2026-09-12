@@ -8,7 +8,9 @@ export const dynamic = "force-dynamic";
 // GET: ดึงรายการ API Keys และ API Logs ล่าสุด
 export async function GET(req: NextRequest) {
   try {
-    const storeId = 1;
+    const { searchParams } = new URL(req.url);
+    const storeIdParam = searchParams.get("store_id");
+    const storeId = storeIdParam ? parseInt(storeIdParam, 10) || 1 : 1;
 
     // 1. ดึงรายการ API Keys ทั้งหมด (พร้อม auto-seed หากเพิ่งเริ่มต้น)
     let keys: any[] = [];
@@ -73,8 +75,8 @@ export async function GET(req: NextRequest) {
 // POST: สร้าง API Key ใหม่แบบสุ่ม 64 ตัวอักษร
 export async function POST(req: NextRequest) {
   try {
-    const storeId = 1;
     const body = await req.json().catch(() => ({}));
+    const storeId = body?.store_id ? parseInt(body.store_id, 10) || 1 : 1;
     const keyName = body.key_name?.trim() || "Production API Key";
 
     // สุ่มคีย์ความยาว 64 ตัวอักษร (Prefix 'sk_live_' ตามด้วย random hex)

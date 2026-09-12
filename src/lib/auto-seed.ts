@@ -34,7 +34,7 @@ const APEX_PRODUCTS = [
     price: 32000.0,
     stock: 12,
     category: "Suspension",
-    image_url: "https://images.unsplash.com/photo-1486006920555-c77dce18193b?auto=format&fit=crop&w=800&q=80",
+    image_url: "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=800&q=80",
   },
   {
     name: "Forged Monoblock Wheels 19-inch",
@@ -61,7 +61,7 @@ const THREE_NFM_PRODUCTS = [
     price: 36500.0,
     stock: 6,
     category: "Intake System",
-    image_url: "https://images.unsplash.com/photo-1486006920555-c77dce18193b?auto=format&fit=crop&w=800&q=80",
+    image_url: "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=800&q=80",
   },
   {
     name: "3NFM Titanium Valvetronic Race Exhaust",

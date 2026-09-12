@@ -49,15 +49,20 @@ interface StoreOverviewCardProps {
     };
   };
   onRenewSuccess: (newTokens: number, newExpiresAt: string) => void;
+  selectedStoreId?: number;
+  onSelectStore?: (storeId: number) => void;
 }
 
 export default function StoreOverviewCard({
   data,
   onRenewSuccess,
+  selectedStoreId,
+  onSelectStore,
 }: StoreOverviewCardProps) {
   const [isRenewing, setIsRenewing] = useState(false);
   const [feedback, setFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
-  const [activeStoreId, setActiveStoreId] = useState<number>(data.store.id);
+  const [internalStoreId, setInternalStoreId] = useState<number>(data.store.id);
+  const activeStoreId = selectedStoreId !== undefined ? selectedStoreId : internalStoreId;
 
   const { user, store, stats, all_stores = [] } = data;
 
@@ -132,7 +137,8 @@ export default function StoreOverviewCard({
                   key={s.id}
                   type="button"
                   onClick={() => {
-                    setActiveStoreId(s.id);
+                    setInternalStoreId(s.id);
+                    onSelectStore?.(s.id);
                     setFeedback(null);
                   }}
                   className={`px-3 py-1.5 rounded-lg text-xs font-sans transition-all cursor-pointer ${

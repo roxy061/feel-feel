@@ -4,8 +4,8 @@ import { ensureDatabaseSeeded } from "@/lib/auto-seed";
 
 export async function POST(req: NextRequest) {
   try {
-    const storeId = 1;
     const body = await req.json().catch(() => null);
+    const storeId = body?.store_id ? parseInt(body.store_id, 10) || 1 : 1;
 
     if (!body || !body.amount) {
       return NextResponse.json(

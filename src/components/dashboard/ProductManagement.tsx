@@ -32,11 +32,13 @@ interface Product {
 interface ProductManagementProps {
   products: Product[];
   onRefresh: () => void;
+  selectedStoreId?: number;
 }
 
 export default function ProductManagement({
   products,
   onRefresh,
+  selectedStoreId,
 }: ProductManagementProps) {
   const [search, setSearch] = useState("");
   const [storeFilter, setStoreFilter] = useState<string>("all");
@@ -58,7 +60,16 @@ export default function ProductManagement({
   });
 
   const handleOpenCreate = () => {
-    setEditingProduct(null);
+    setEditingProduct({
+      store_id: selectedStoreId || 1,
+      name: "",
+      description: "",
+      price: "",
+      stock: 10,
+      category: "Performance",
+      is_available: true,
+      image_url: "",
+    });
     setModalOpen(true);
   };
 

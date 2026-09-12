@@ -30,7 +30,13 @@ export default function HeroSection({
 
   return (
     <section className="relative w-full min-h-[600px] max-h-[965px] h-[85vh] overflow-hidden flex flex-col justify-between">
-      {/* 1. Cinematic Background Video with Poster Fallback */}
+      {/* 1. Cinematic Background Poster Image (Guaranteed fallback layer) */}
+      <div
+        className="absolute inset-0 w-full h-full bg-cover bg-center pointer-events-none z-0 brightness-[0.65] contrast-[1.15]"
+        style={{ backgroundImage: `url(${bannerUrl || fallbackPoster})` }}
+      />
+
+      {/* Cinematic Background Video */}
       <video
         autoPlay
         loop

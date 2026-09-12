@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { query } from "@/lib/db";
 
+export const dynamic = "force-dynamic";
+
 // PUT: แก้ไขข้อมูลสินค้า
 export async function PUT(
   req: NextRequest,
