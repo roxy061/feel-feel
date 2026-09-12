@@ -41,22 +41,16 @@ export default function ProductManagement({
   selectedStoreId,
 }: ProductManagementProps) {
   const [search, setSearch] = useState("");
-  const [storeFilter, setStoreFilter] = useState<string>("all");
   const [modalOpen, setModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<ProductData | null>(null);
   const [isDeleting, setIsDeleting] = useState<number | null>(null);
 
   const filtered = products.filter((p) => {
-    const matchesStore =
-      storeFilter === "all" ||
-      (storeFilter === "3nfm" && (p.subdomain === "3nfm" || p.store_id === 3)) ||
-      (storeFilter === "apex" && (p.subdomain === "apex" || p.store_id === 1));
-
     const matchesSearch =
       p.name.toLowerCase().includes(search.toLowerCase()) ||
       (p.category && p.category.toLowerCase().includes(search.toLowerCase()));
 
-    return matchesStore && matchesSearch;
+    return matchesSearch;
   });
 
   const handleOpenCreate = () => {
@@ -66,7 +60,7 @@ export default function ProductManagement({
       description: "",
       price: "",
       stock: 10,
-      category: "Performance",
+      category: "Aero & Carbon",
       is_available: true,
       image_url: "",
     });
@@ -121,32 +115,11 @@ export default function ProductManagement({
             </h3>
           </div>
           <p className="font-sans text-xs text-[#EEEFF2]/60">
-            รายการสินค้าทั้งหมด {products.length} รายการในคลังสินค้าทุกร้านค้า
+            รายการสินค้าของร้านค้านี้ ({filtered.length} รายการ)
           </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
-          {/* Store Filter Pills */}
-          <div className="flex items-center gap-1 p-1 rounded-xl bg-[#010101]/60 border border-[#EEEFF2]/10 font-sans text-xs">
-            {[
-              { id: "all", label: "ทุกร้าน" },
-              { id: "3nfm", label: "3NFM" },
-              { id: "apex", label: "Apex" },
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setStoreFilter(tab.id)}
-                className={`px-3 py-1.5 rounded-lg text-xs transition-all cursor-pointer ${
-                  storeFilter === tab.id
-                    ? "bg-[#272835] text-[#EEEFF2] font-semibold border border-[#EEEFF2]/20 shadow-sm"
-                    : "text-[#EEEFF2]/60 hover:text-[#EEEFF2]"
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
 
           {/* Search Box */}
           <div className="relative">
@@ -227,7 +200,7 @@ export default function ProductManagement({
                                   : "bg-sky-950/70 text-sky-400 border-sky-500/30"
                               }`}
                             >
-                              {isStore3NFM ? "3NFM" : "Apex"}
+                              {item.store_name || (isStore3NFM ? "3NFM" : "Apex")}
                             </span>
                             <span className="font-mono text-[10px] text-[#EEEFF2]/40">
                               ID: #{item.id}
@@ -245,7 +218,7 @@ export default function ProductManagement({
 
                     <td className="py-4 px-4 text-right font-mono font-bold text-[#EEEFF2] text-sm">
                       {numPrice.toLocaleString("th-TH", { minimumFractionDigits: 2 })}{" "}
-                      <span className="text-[10px] text-[#EEEFF2]/50 font-normal">฿</span>
+                      <span className="text-[10px] text-amber-400 font-semibold">THB</span>
                     </td>
 
                     <td className="py-4 px-4 text-center font-mono">

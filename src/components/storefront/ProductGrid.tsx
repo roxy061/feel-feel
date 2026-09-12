@@ -165,7 +165,7 @@ export default function ProductGrid({ products, storeName, storeId }: ProductGri
                       </div>
                       <div className="font-mono text-xl sm:text-2xl font-bold text-[#EEEFF2] tracking-tight">
                         {numPrice.toLocaleString("th-TH", { minimumFractionDigits: 2 })}{" "}
-                        <span className="text-xs font-sans text-[#EEEFF2]/60 font-normal">บาท</span>
+                        <span className="text-xs font-mono text-amber-400 font-semibold">THB</span>
                       </div>
                     </div>
 

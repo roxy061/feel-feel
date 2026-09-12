@@ -5,87 +5,95 @@ let seedPromise: Promise<void> | null = null;
 
 const APEX_PRODUCTS = [
   {
-    name: "Apex Carbon Fiber Aero Wing V2",
-    description: "สปอยเลอร์คาร์บอนไฟเบอร์แท้ 100% เพิ่มแรงกด Downforce 35% พร้อมขายึดไทเทเนียม CNC น้ำหนักเบาพิเศษ",
-    price: 24900.0,
+    name: "Carbon Fiber Aero GT Wing",
+    description: "สปอยเลอร์คาร์บอนไฟเบอร์แท้ 100% เพิ่มแรงกดท้าย Downforce 45 กก. ที่ความเร็ว 200 กม./ชม. พร้อมขายึดไทเทเนียม CNC น้ำหนักเบาพิเศษ",
+    price: 34900.0,
     stock: 5,
-    category: "Aerodynamics",
+    category: "Aero & Carbon",
     image_url: "https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&w=800&q=80",
   },
   {
-    name: "Monoblock 6-Pot Brake Caliper Set",
-    description: "ชุดเบรกคาลิปเปอร์อะลูมิเนียมหล่อชิ้นเดียว ทนความร้อนสูงพิเศษ 800°C ตอบสนองระยะเบรกแม่นยำฉับไว",
-    price: 48500.0,
-    stock: 3,
+    name: "Forged Monoblock 6-Pot Calipers",
+    description: "ชุดคาลิปเปอร์เบรกโมโนบล็อกอะลูมิเนียมฟอร์จ 6 ลูกสูบ พร้อมจานขยายเซาะร่อง 390mm ทนความร้อนสูง 800°C ตอบสนองระยะเบรกแม่นยำฉับไว",
+    price: 54000.0,
+    stock: 4,
     category: "Braking System",
     image_url: "https://images.unsplash.com/photo-1600705722908-bab1e61c0b4d?auto=format&fit=crop&w=800&q=80",
   },
   {
-    name: "Forged Titanium Exhaust System",
-    description: "ระบบท่อไอเสียไทเทเนียมเกรดอากาศยาน น้ำหนักเบากว่าของเดิม 60% เสียงกระหึ่มเร้าใจแบบมอเตอร์สปอร์ต",
-    price: 38900.0,
-    stock: 8,
-    category: "Exhaust",
+    name: "ECU Stage 2 Remap Tuning File",
+    description: "ซอฟต์แวร์ปรับจูนแมพน้ำมันและไฟจุดระเบิด ปลดล็อคแรงม้าเพิ่มขึ้น +65 HP และแรงบิด +90 Nm สำหรับเชื้อเพลิง 95/E20",
+    price: 19500.0,
+    stock: 99,
+    category: "Engine & Tuning",
+    image_url: "https://images.unsplash.com/photo-1511919884226-fd3cad34687c?auto=format&fit=crop&w=800&q=80",
+  },
+  {
+    name: "Titanium Valvetronic Cat-Back Exhaust",
+    description: "ระบบท่อไอเสียไทเทเนียมเกรดอากาศยานทั้งเส้นพร้อมวาล์วไฟฟ้าเปิด-ปิดเสียง ควบคุมด้วยรีโมทไร้สายและแอปพลิเคชัน",
+    price: 46000.0,
+    stock: 6,
+    category: "Exhaust & Intake",
     image_url: "https://images.unsplash.com/photo-1542282088-72c9c27ed0cd?auto=format&fit=crop&w=800&q=80",
   },
   {
-    name: "Full Adjustable Coilover Suspension",
-    description: "โช้คอัพสตรัทปรับเกลียว 32 ระดับ ซับแรงกระแทกและควบคุมเสถียรภาพตัวถังได้อย่างเฉียบคมในโค้ง",
-    price: 32000.0,
-    stock: 12,
-    category: "Suspension",
+    name: "Competition 2-Way Coilover Suspension",
+    description: "โช้คอัพสตรัทปรับเกลียว 2-Way ปรับ Rebound และ Compression แยกอิสระ 32 ระดับ ซับแรงกระแทกและควบคุมเสถียรภาพตัวถังในโค้ง",
+    price: 44500.0,
+    stock: 8,
+    category: "Aero & Carbon",
     image_url: "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=800&q=80",
   },
   {
-    name: "Forged Monoblock Wheels 19-inch",
-    description: "ล้อแม็กฟอร์จน้ำหนักเบาพิเศษ แข็งแกร่งทนทานรับแรงบิดมหาศาล สไตล์ Racing Concave",
+    name: "Forged Racing Monoblock Wheels 19-inch",
+    description: "ล้อแม็กฟอร์จน้ำหนักเบาพิเศษ แข็งแกร่งทนทานรับแรงบิดมหาศาล สไตล์ Racing Concave Spec",
     price: 56000.0,
     stock: 4,
-    category: "Wheels",
+    category: "Aero & Carbon",
     image_url: "https://images.unsplash.com/photo-1558981806-ec527fa84c39?auto=format&fit=crop&w=800&q=80",
-  },
-  {
-    name: "Motorsport ECU Tuning Module",
-    description: "กล่องเพิ่มแรงม้าและแรงบิดระดับแข่งขัน ปรับจูนกราฟอัตราเร่งและรอบเครื่องอย่างมีประสิทธิภาพ",
-    price: 18500.0,
-    stock: 15,
-    category: "Electronics",
-    image_url: "https://images.unsplash.com/photo-1511919884226-fd3cad34687c?auto=format&fit=crop&w=800&q=80",
   },
 ];
 
 const THREE_NFM_PRODUCTS = [
   {
-    name: "3NFM Stage-3 Carbon Intake Plenum",
-    description: "ท่อร่วมไอดีคาร์บอนไฟเบอร์เกรดแห้งแบบ Dry Carbon เพิ่มปริมาตรการไหลเวียนของไอดี 45% ทนความร้อนสูง",
-    price: 36500.0,
+    name: "Titanium Exhaust Downpipe",
+    description: "ท่อระบายไอเสียไทเทเนียมเกรดอากาศยาน น้ำหนักเบาพิเศษ เพิ่มอัตราการไหลเวียนไอเสีย Flow สูงสุด 38% ทนความร้อนสูง",
+    price: 38500.0,
     stock: 6,
-    category: "Intake System",
-    image_url: "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=800&q=80",
-  },
-  {
-    name: "3NFM Titanium Valvetronic Race Exhaust",
-    description: "ระบบท่อไอเสียไทเทเนียมพร้อมวาล์วไฟฟ้าเปิด-ปิดเสียงอัตโนมัติตามรอบเครื่องยนต์ ลดน้ำหนักตัวถังลง 14.5 กก.",
-    price: 49000.0,
-    stock: 4,
-    category: "Exhaust System",
+    category: "Exhaust & Intake",
     image_url: "https://images.unsplash.com/photo-1542282088-72c9c27ed0cd?auto=format&fit=crop&w=800&q=80",
   },
   {
-    name: "Forged Carbon GT Rear Wing 1600mm",
-    description: "วิงหลังคาร์บอนลายฟอร์จแท้ ปรับมุมองศาการรับลมได้ 4 ระดับ ขาจับอะลูมิเนียมเกรดอากาศยาน 7075",
-    price: 28500.0,
-    stock: 8,
-    category: "Aerodynamics",
-    image_url: "https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&w=800&q=80",
+    name: "Digital Telemetry Lap Timer",
+    description: "จอแสดงผลข้อมูลการขับขี่และจับเวลารอบสนามแบบเรียลไทม์ พร้อมเซนเซอร์ GPS 10Hz และการเชื่อมต่อ CAN-Bus แม่นยำสูง",
+    price: 21900.0,
+    stock: 10,
+    category: "Electronics & Telemetry",
+    image_url: "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=800&q=80",
   },
   {
-    name: "3NFM Competition Inverted Coilover Kit",
-    description: "โช้คอัพหัวกลับระดับการแข่งขัน ปรับหนืด Bump/Rebound แยกอิสระ 2-Way สปริงนำเข้าจากเยอรมนี",
-    price: 42000.0,
-    stock: 10,
-    category: "Suspension",
-    image_url: "https://images.unsplash.com/photo-1600705722908-bab1e61c0b4d?auto=format&fit=crop&w=800&q=80",
+    name: "High-Flow Air Intake Box",
+    description: "ชุดกรองอากาศคาร์บอนไฟเบอร์เกรดแห้งแบบ Dry Carbon เพิ่มปริมาณอากาศเข้าสู่ห้องเผาไหม้และกักเก็บความเย็น",
+    price: 28000.0,
+    stock: 8,
+    category: "Exhaust & Intake",
+    image_url: "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=800&q=80",
+  },
+  {
+    name: "Quickshifter Controller Unit",
+    description: "กล่องตัดรอบไฟเปลี่ยนเกียร์สมูทไม่ต้องยกคันเร่ง ความเร็วตัดไฟ 0.04 วินาที ยกระดับความเร็วอัตราเร่งทางตรง",
+    price: 16500.0,
+    stock: 12,
+    category: "Electronics & Telemetry",
+    image_url: "https://images.unsplash.com/photo-1511919884226-fd3cad34687c?auto=format&fit=crop&w=800&q=80",
+  },
+  {
+    name: "3NFM Stage-3 Carbon Intake Plenum",
+    description: "ท่อร่วมไอดีคาร์บอนไฟเบอร์เกรดแห้งแบบ Dry Carbon เพิ่มปริมาตรการไหลเวียนของไอดี 45% ทนความร้อนสูง",
+    price: 36500.0,
+    stock: 4,
+    category: "Exhaust & Intake",
+    image_url: "https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&w=800&q=80",
   },
   {
     name: "Ceramic-Carbon Monoblock Brake Rotor 380mm",
@@ -94,14 +102,6 @@ const THREE_NFM_PRODUCTS = [
     stock: 3,
     category: "Braking System",
     image_url: "https://images.unsplash.com/photo-1558981806-ec527fa84c39?auto=format&fit=crop&w=800&q=80",
-  },
-  {
-    name: "Full Standalone Motorsport ECU V3",
-    description: "กล่องควบคุมเครื่องยนต์อัจฉริยะ รองรับระบบ Launch Control, Flat Shift, Anti-Lag และการเชื่อมต่อ CAN-Bus",
-    price: 26000.0,
-    stock: 12,
-    category: "Engine Management",
-    image_url: "https://images.unsplash.com/photo-1511919884226-fd3cad34687c?auto=format&fit=crop&w=800&q=80",
   },
 ];
 
@@ -144,7 +144,13 @@ async function runDatabaseSeed(): Promise<void> {
     await db.query("ALTER TABLE stores ADD COLUMN store_key VARCHAR(64) DEFAULT 'store-3nfm' AFTER user_id;");
   } catch {}
   try {
-    await db.query("ALTER TABLE stores ADD COLUMN expires_at DATETIME DEFAULT NULL AFTER truemoney_phone;");
+    await db.query("ALTER TABLE stores ADD COLUMN promptpay_number VARCHAR(50) DEFAULT '0812345678' AFTER truemoney_phone;");
+  } catch {}
+  try {
+    await db.query("ALTER TABLE stores ADD COLUMN expires_at DATETIME DEFAULT NULL AFTER promptpay_number;");
+  } catch {}
+  try {
+    await db.query("ALTER TABLE stores ADD COLUMN status VARCHAR(30) DEFAULT 'active' AFTER expires_at;");
   } catch {}
 
   // 3. Create products table

@@ -7,22 +7,22 @@ export const dynamic = "force-dynamic";
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
-    const storeIdParam = searchParams.get("store_id");
-    const storeId = storeIdParam ? parseInt(storeIdParam, 10) || 1 : 1;
+    // กระเป๋าเงิน (Wallet) และโทเคน (Tokens) เป็นกองกลางของบัญชีผู้ใช้ (u-001)
     const userId = "u-001";
+    const masterStoreId = 1; // บัญชีกระเป๋าเงินหลักของ User
 
     // 1. ดึงข้อมูลกระเป๋าเงิน (Wallet) พร้อม Auto-Seed หากยังไม่มี
     let wallets: any[] = [];
     try {
       wallets = await query<any[]>(
         "SELECT id, balance, updated_at FROM wallets WHERE store_id = ? LIMIT 1",
-        [storeId]
+        [masterStoreId]
       );
     } catch {
       await ensureDatabaseSeeded();
       wallets = await query<any[]>(
         "SELECT id, balance, updated_at FROM wallets WHERE store_id = ? LIMIT 1",
-        [storeId]
+        [masterStoreId]
       );
     }
 
@@ -30,12 +30,12 @@ export async function GET(req: NextRequest) {
       await ensureDatabaseSeeded();
       wallets = await query<any[]>(
         "SELECT id, balance, updated_at FROM wallets WHERE store_id = ? LIMIT 1",
-        [storeId]
+        [masterStoreId]
       );
     }
 
     if (!wallets || wallets.length === 0) {
-      await query("INSERT INTO wallets (store_id, balance) VALUES (?, 150.00)", [storeId]);
+      await query("INSERT INTO wallets (store_id, balance) VALUES (?, 150.00)", [masterStoreId]);
       wallets = [{ id: 1, balance: "150.0000" }];
     }
 

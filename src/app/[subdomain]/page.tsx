@@ -1,5 +1,7 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import Link from "next/link";
+import { Clock, AlertTriangle, LayoutDashboard, ArrowRight } from "lucide-react";
 import { query } from "@/lib/db";
 import { ensureDatabaseSeeded } from "@/lib/auto-seed";
 import StoreNavbar from "@/components/storefront/StoreNavbar";
@@ -24,6 +26,8 @@ interface StoreRecord {
   decorative_text: string | null;
   video_url: string | null;
   banner_url: string | null;
+  expires_at?: string | Date | null;
+  status?: string | null;
   created_at?: string;
 }
 
@@ -74,49 +78,60 @@ const FALLBACK_PRODUCTS_3NFM: ProductRecord[] = [
   {
     id: 301,
     store_id: 3,
-    name: "3NFM Stage-3 Carbon Intake Plenum",
-    description: "ท่อร่วมไอดีคาร์บอนไฟเบอร์เกรดแห้งแบบ Dry Carbon เพิ่มปริมาตรการไหลเวียนของไอดี 45% ทนความร้อนสูง",
-    price: 36500.0,
+    name: "Titanium Exhaust Downpipe",
+    description: "ท่อระบายไอเสียไทเทเนียมเกรดอากาศยาน น้ำหนักเบาพิเศษ เพิ่มอัตราการไหลเวียนไอเสีย Flow สูงสุด 38% ทนความร้อนสูง",
+    price: 38500.0,
     stock: 6,
-    category: "Intake System",
-    image_url: "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=800&q=80",
+    category: "Exhaust & Intake",
+    image_url: "https://images.unsplash.com/photo-1542282088-72c9c27ed0cd?auto=format&fit=crop&w=800&q=80",
     is_available: 1,
   },
   {
     id: 302,
     store_id: 3,
-    name: "3NFM Titanium Valvetronic Race Exhaust",
-    description: "ระบบท่อไอเสียไทเทเนียมพร้อมวาล์วไฟฟ้าเปิด-ปิดเสียงอัตโนมัติตามรอบเครื่องยนต์ ลดน้ำหนักตัวถังลง 14.5 กก.",
-    price: 49000.0,
-    stock: 4,
-    category: "Exhaust System",
-    image_url: "https://images.unsplash.com/photo-1542282088-72c9c27ed0cd?auto=format&fit=crop&w=800&q=80",
+    name: "Digital Telemetry Lap Timer",
+    description: "จอแสดงผลข้อมูลการขับขี่และจับเวลารอบสนามแบบเรียลไทม์ พร้อมเซนเซอร์ GPS 10Hz และการเชื่อมต่อ CAN-Bus แม่นยำสูง",
+    price: 21900.0,
+    stock: 10,
+    category: "Electronics & Telemetry",
+    image_url: "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=800&q=80",
     is_available: 1,
   },
   {
     id: 303,
     store_id: 3,
-    name: "Forged Carbon GT Rear Wing 1600mm",
-    description: "วิงหลังคาร์บอนลายฟอร์จแท้ ปรับมุมองศาการรับลมได้ 4 ระดับ ขาจับอะลูมิเนียมเกรดอากาศยาน 7075",
-    price: 28500.0,
+    name: "High-Flow Air Intake Box",
+    description: "ชุดกรองอากาศคาร์บอนไฟเบอร์เกรดแห้งแบบ Dry Carbon เพิ่มปริมาณอากาศเข้าสู่ห้องเผาไหม้และกักเก็บความเย็น",
+    price: 28000.0,
     stock: 8,
-    category: "Aerodynamics",
-    image_url: "https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&w=800&q=80",
+    category: "Exhaust & Intake",
+    image_url: "https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=800&q=80",
     is_available: 1,
   },
   {
     id: 304,
     store_id: 3,
-    name: "3NFM Competition Inverted Coilover Kit",
-    description: "โช้คอัพหัวกลับระดับการแข่งขัน ปรับหนืด Bump/Rebound แยกอิสระ 2-Way สปริงนำเข้าจากเยอรมนี",
-    price: 42000.0,
-    stock: 10,
-    category: "Suspension",
-    image_url: "https://images.unsplash.com/photo-1600705722908-bab1e61c0b4d?auto=format&fit=crop&w=800&q=80",
+    name: "Quickshifter Controller Unit",
+    description: "กล่องตัดรอบไฟเปลี่ยนเกียร์สมูทไม่ต้องยกคันเร่ง ความเร็วตัดไฟ 0.04 วินาที ยกระดับความเร็วอัตราเร่งทางตรง",
+    price: 16500.0,
+    stock: 12,
+    category: "Electronics & Telemetry",
+    image_url: "https://images.unsplash.com/photo-1511919884226-fd3cad34687c?auto=format&fit=crop&w=800&q=80",
     is_available: 1,
   },
   {
     id: 305,
+    store_id: 3,
+    name: "3NFM Stage-3 Carbon Intake Plenum",
+    description: "ท่อร่วมไอดีคาร์บอนไฟเบอร์เกรดแห้งแบบ Dry Carbon เพิ่มปริมาตรการไหลเวียนของไอดี 45% ทนความร้อนสูง",
+    price: 36500.0,
+    stock: 4,
+    category: "Exhaust & Intake",
+    image_url: "https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&w=800&q=80",
+    is_available: 1,
+  },
+  {
+    id: 306,
     store_id: 3,
     name: "Ceramic-Carbon Monoblock Brake Rotor 380mm",
     description: "จานเบรกเซรามิกคาร์บอนน้ำหนักเบาพิเศษ ทนอุณหภูมิสนามแข่งได้ถึง 1,000°C โดยไม่มีอาการเบรกเฟด",
@@ -126,38 +141,27 @@ const FALLBACK_PRODUCTS_3NFM: ProductRecord[] = [
     image_url: "https://images.unsplash.com/photo-1558981806-ec527fa84c39?auto=format&fit=crop&w=800&q=80",
     is_available: 1,
   },
-  {
-    id: 306,
-    store_id: 3,
-    name: "Full Standalone Motorsport ECU V3",
-    description: "กล่องควบคุมเครื่องยนต์อัจฉริยะ รองรับระบบ Launch Control, Flat Shift, Anti-Lag และการเชื่อมต่อ CAN-Bus",
-    price: 26000.0,
-    stock: 12,
-    category: "Engine Management",
-    image_url: "https://images.unsplash.com/photo-1511919884226-fd3cad34687c?auto=format&fit=crop&w=800&q=80",
-    is_available: 1,
-  },
 ];
 
 const FALLBACK_PRODUCTS_APEX: ProductRecord[] = [
   {
     id: 101,
     store_id: 1,
-    name: "Apex Carbon Fiber Aero Wing V2",
-    description: "สปอยเลอร์คาร์บอนไฟเบอร์แท้ 100% เพิ่มแรงกด Downforce 35% พร้อมขายึดไทเทเนียม CNC น้ำหนักเบาพิเศษ",
-    price: 24900.0,
+    name: "Carbon Fiber Aero GT Wing",
+    description: "สปอยเลอร์คาร์บอนไฟเบอร์แท้ 100% เพิ่มแรงกดท้าย Downforce 45 กก. ที่ความเร็ว 200 กม./ชม. พร้อมขายึดไทเทเนียม CNC น้ำหนักเบาพิเศษ",
+    price: 34900.0,
     stock: 5,
-    category: "Aerodynamics",
+    category: "Aero & Carbon",
     image_url: "https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&w=800&q=80",
     is_available: 1,
   },
   {
     id: 102,
     store_id: 1,
-    name: "Monoblock 6-Pot Brake Caliper Set",
-    description: "ชุดเบรกคาลิปเปอร์อะลูมิเนียมหล่อชิ้นเดียว ทนความร้อนสูงพิเศษ 800°C ตอบสนองระยะเบรกแม่นยำฉับไว",
-    price: 48500.0,
-    stock: 3,
+    name: "Forged Monoblock 6-Pot Calipers",
+    description: "ชุดคาลิปเปอร์เบรกโมโนบล็อกอะลูมิเนียมฟอร์จ 6 ลูกสูบ พร้อมจานขยายเซาะร่อง 390mm ทนความร้อนสูง 800°C ตอบสนองระยะเบรกแม่นยำฉับไว",
+    price: 54000.0,
+    stock: 4,
     category: "Braking System",
     image_url: "https://images.unsplash.com/photo-1600705722908-bab1e61c0b4d?auto=format&fit=crop&w=800&q=80",
     is_available: 1,
@@ -165,45 +169,45 @@ const FALLBACK_PRODUCTS_APEX: ProductRecord[] = [
   {
     id: 103,
     store_id: 1,
-    name: "Forged Titanium Exhaust System",
-    description: "ระบบท่อไอเสียไทเทเนียมเกรดอากาศยาน น้ำหนักเบากว่าของเดิม 60% เสียงกระหึ่มเร้าใจแบบมอเตอร์สปอร์ต",
-    price: 38900.0,
-    stock: 8,
-    category: "Exhaust",
-    image_url: "https://images.unsplash.com/photo-1542282088-72c9c27ed0cd?auto=format&fit=crop&w=800&q=80",
+    name: "ECU Stage 2 Remap Tuning File",
+    description: "ซอฟต์แวร์ปรับจูนแมพน้ำมันและไฟจุดระเบิด ปลดล็อคแรงม้าเพิ่มขึ้น +65 HP และแรงบิด +90 Nm สำหรับเชื้อเพลิง 95/E20",
+    price: 19500.0,
+    stock: 99,
+    category: "Engine & Tuning",
+    image_url: "https://images.unsplash.com/photo-1511919884226-fd3cad34687c?auto=format&fit=crop&w=800&q=80",
     is_available: 1,
   },
   {
     id: 104,
     store_id: 1,
-    name: "Full Adjustable Coilover Suspension",
-    description: "โช้คอัพสตรัทปรับเกลียว 32 ระดับ ซับแรงกระแทกและควบคุมเสถียรภาพตัวถังได้อย่างเฉียบคมในโค้ง",
-    price: 32000.0,
-    stock: 12,
-    category: "Suspension",
-    image_url: "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=800&q=80",
+    name: "Titanium Valvetronic Cat-Back Exhaust",
+    description: "ระบบท่อไอเสียไทเทเนียมเกรดอากาศยานทั้งเส้นพร้อมวาล์วไฟฟ้าเปิด-ปิดเสียง ควบคุมด้วยรีโมทไร้สายและแอปพลิเคชัน",
+    price: 46000.0,
+    stock: 6,
+    category: "Exhaust & Intake",
+    image_url: "https://images.unsplash.com/photo-1542282088-72c9c27ed0cd?auto=format&fit=crop&w=800&q=80",
     is_available: 1,
   },
   {
     id: 105,
     store_id: 1,
-    name: "Forged Monoblock Wheels 19-inch",
-    description: "ล้อแม็กฟอร์จน้ำหนักเบาพิเศษ แข็งแกร่งทนทานรับแรงบิดมหาศาล สไตล์ Racing Concave",
-    price: 56000.0,
-    stock: 4,
-    category: "Wheels",
-    image_url: "https://images.unsplash.com/photo-1558981806-ec527fa84c39?auto=format&fit=crop&w=800&q=80",
+    name: "Competition 2-Way Coilover Suspension",
+    description: "โช้คอัพสตรัทปรับเกลียว 2-Way ปรับ Rebound และ Compression แยกอิสระ 32 ระดับ ซับแรงกระแทกและควบคุมเสถียรภาพตัวถังในโค้ง",
+    price: 44500.0,
+    stock: 8,
+    category: "Aero & Carbon",
+    image_url: "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=800&q=80",
     is_available: 1,
   },
   {
     id: 106,
     store_id: 1,
-    name: "Motorsport ECU Tuning Module",
-    description: "กล่องเพิ่มแรงม้าและแรงบิดระดับแข่งขัน ปรับจูนกราฟอัตราเร่งและรอบเครื่องอย่างมีประสิทธิภาพ",
-    price: 18500.0,
-    stock: 15,
-    category: "Electronics",
-    image_url: "https://images.unsplash.com/photo-1511919884226-fd3cad34687c?auto=format&fit=crop&w=800&q=80",
+    name: "Forged Racing Monoblock Wheels 19-inch",
+    description: "ล้อแม็กฟอร์จน้ำหนักเบาพิเศษ แข็งแกร่งทนทานรับแรงบิดมหาศาล สไตล์ Racing Concave Spec",
+    price: 56000.0,
+    stock: 4,
+    category: "Aero & Carbon",
+    image_url: "https://images.unsplash.com/photo-1558981806-ec527fa84c39?auto=format&fit=crop&w=800&q=80",
     is_available: 1,
   },
 ];
@@ -297,6 +301,60 @@ export default async function TenantStorePage({ params }: TenantStorePageProps) 
     store = FALLBACK_STORES[subdomain];
   } else {
     notFound();
+  }
+
+  // ตรวจสอบสถานะการหมดอายุของร้านค้า (Store Subscription / Trial Expiration)
+  const now = new Date();
+  const isExpired =
+    store.status === "expired" ||
+    (store.expires_at ? new Date(store.expires_at) < now : false);
+
+  if (isExpired) {
+    return (
+      <div className="min-h-[100dvh] bg-[#010101] text-[#EEEFF2] flex flex-col justify-between selection:bg-[#272835] selection:text-[#EEEFF2]">
+        <StoreNavbar storeName={store.name} subdomain={store.subdomain} cartCount={0} />
+
+        <main className="flex-1 max-w-3xl w-full mx-auto px-4 py-16 sm:py-24 flex flex-col items-center justify-center text-center">
+          <div className="p-8 sm:p-12 rounded-xl bg-[#090A0F] border border-amber-500/30 w-full shadow-2xl relative overflow-hidden">
+            <div className="w-16 h-16 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center mx-auto mb-6 text-amber-400">
+              <Clock className="w-8 h-8" />
+            </div>
+
+            <div className="font-mono text-xs text-amber-400 tracking-wider uppercase mb-2">
+              STORE SUBSCRIPTION NOTICE &bull; TRIAL PERIOD EXPIRED
+            </div>
+
+            <h1 className="font-bebas text-4xl sm:text-5xl tracking-wide text-[#EEEFF2] mb-3">
+              ร้านค้านี้หมดอายุการใช้งานชั่วคราว
+            </h1>
+
+            <p className="font-sans text-sm sm:text-base text-[#EEEFF2]/75 max-w-xl mx-auto leading-relaxed mb-8">
+              ร้านค้า <span className="text-white font-semibold">{store.name}</span> ได้สิ้นสุดระยะเวลาทดลองใช้งานหรือรอบบิลปัจจุบันแล้ว หากคุณเป็นเจ้าของร้านค้า กรุณาเข้าสู่ Merchant Dashboard เพื่อต่ออายุการใช้งานด้วยโทเคน
+            </p>
+
+            <div className="flex flex-wrap items-center justify-center gap-3.5">
+              <Link
+                href="/dashboard"
+                className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-[#EEEFF2] text-[#010101] hover:bg-[#EEEFF2]/90 font-semibold text-xs transition-all shadow-xl active:scale-95"
+              >
+                <LayoutDashboard className="w-4 h-4" />
+                <span>เข้าสู่ Merchant Dashboard เพื่อต่ออายุ</span>
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+
+              <Link
+                href="/"
+                className="inline-flex items-center gap-2 px-5 py-3.5 rounded-xl bg-[#272835] hover:bg-[#343647] border border-[#EEEFF2]/15 text-xs font-semibold text-[#EEEFF2] transition-all"
+              >
+                <span>กลับสู่หน้าแรก 3NFM</span>
+              </Link>
+            </div>
+          </div>
+        </main>
+
+        <StoreFooter storeName={store.name} subdomain={store.subdomain} />
+      </div>
+    );
   }
 
   // 3. ดึงรายการสินค้าของร้านค้า

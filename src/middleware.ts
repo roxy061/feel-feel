@@ -21,11 +21,12 @@ export default function middleware(req: NextRequest) {
     "localhost:3000";
 
   // 1. Direct path routing protection:
-  // หากผู้ใช้เข้าถึงผ่านเส้นทางตรง เช่น /3nfm, /apex, /dashboard ให้ปล่อยผ่านทันทีโดยไม่ rewrite
-  const directAllowedPaths = ["/3nfm", "/apex", "/dashboard"];
+  // หากผู้ใช้เข้าถึงผ่านเส้นทางตรง เช่น /3nfm, /apex, /dashboard, /onboarding ให้ปล่อยผ่านทันทีโดยไม่ rewrite
+  const directAllowedPaths = ["/3nfm", "/apex", "/dashboard", "/onboarding"];
   if (
     directAllowedPaths.includes(url.pathname.toLowerCase()) ||
-    url.pathname.toLowerCase().startsWith("/dashboard/")
+    url.pathname.toLowerCase().startsWith("/dashboard/") ||
+    url.pathname.toLowerCase().startsWith("/onboarding/")
   ) {
     return NextResponse.next();
   }
@@ -65,6 +66,10 @@ export default function middleware(req: NextRequest) {
     "dashboard",
     "mail",
     "superadmin",
+    "onboarding",
+    "settings",
+    "root",
+    "dev",
   ]);
 
   // Clone headers to pass tenant information downstream

@@ -52,7 +52,7 @@ const poolConfig: PoolOptions = connectionUri
           process.env.DB_PORT ||
             process.env.MYSQL_PORT ||
             process.env.TIDB_PORT
-        ) || 3306,
+        ) || (host.includes("tidbcloud.com") || process.env.TIDB_HOST ? 4000 : 3306),
       user:
         process.env.DB_USER ||
         process.env.MYSQL_USER ||

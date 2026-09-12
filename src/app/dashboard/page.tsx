@@ -5,18 +5,20 @@ import { Loader2, RefreshCw, AlertCircle } from "lucide-react";
 import StoreOverviewCard from "@/components/dashboard/StoreOverviewCard";
 import ProductManagement from "@/components/dashboard/ProductManagement";
 import OrderVerification from "@/components/dashboard/OrderVerification";
+import { useStore } from "@/context/StoreContext";
 
 export default function DashboardPage() {
+  const { activeStoreId, setActiveStoreId, refreshStores } = useStore();
   const [overviewData, setOverviewData] = useState<any | null>(null);
-  const [selectedStoreId, setSelectedStoreId] = useState<number | null>(null);
   const [products, setProducts] = useState<any[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchOverview = useCallback(async () => {
+  const fetchOverview = useCallback(async (storeId?: number | null) => {
     try {
-      const res = await fetch("/api/merchant/overview");
+      const url = storeId ? `/api/merchant/overview?store_id=${storeId}` : "/api/merchant/overview";
+      const res = await fetch(url);
       const json = await res.json();
       if (json.success) {
         setOverviewData(json.data);
@@ -26,9 +28,10 @@ export default function DashboardPage() {
     }
   }, []);
 
-  const fetchProducts = useCallback(async () => {
+  const fetchProducts = useCallback(async (storeId?: number | null) => {
     try {
-      const res = await fetch("/api/merchant/products");
+      const url = storeId ? `/api/merchant/products?store_id=${storeId}` : "/api/merchant/products";
+      const res = await fetch(url);
       const json = await res.json();
       if (json.success) {
         setProducts(json.products || []);
@@ -38,9 +41,10 @@ export default function DashboardPage() {
     }
   }, []);
 
-  const fetchOrders = useCallback(async () => {
+  const fetchOrders = useCallback(async (storeId?: number | null) => {
     try {
-      const res = await fetch("/api/merchant/orders");
+      const url = storeId ? `/api/merchant/orders?store_id=${storeId}` : "/api/merchant/orders";
+      const res = await fetch(url);
       const json = await res.json();
       if (json.success) {
         setOrders(json.orders || []);
@@ -50,10 +54,10 @@ export default function DashboardPage() {
     }
   }, []);
 
-  const fetchAllData = useCallback(async () => {
+  const fetchAllData = useCallback(async (storeId?: number | null) => {
     setError(null);
     try {
-      await Promise.all([fetchOverview(), fetchProducts(), fetchOrders()]);
+      await Promise.all([fetchOverview(storeId), fetchProducts(storeId), fetchOrders(storeId)]);
     } catch (err: any) {
       setError(err?.message || "เกิดข้อผิดพลาดในการโหลดข้อมูลแดชบอร์ด");
     } finally {
@@ -62,10 +66,11 @@ export default function DashboardPage() {
   }, [fetchOverview, fetchProducts, fetchOrders]);
 
   useEffect(() => {
-    fetchAllData();
-  }, [fetchAllData]);
+    fetchAllData(activeStoreId);
+  }, [activeStoreId, fetchAllData]);
 
   const handleRenewSuccess = (newTokens: number, newExpiresAt: string) => {
+    refreshStores();
     if (overviewData) {
       setOverviewData({
         ...overviewData,
@@ -85,7 +90,7 @@ export default function DashboardPage() {
     }
   };
 
-  if (loading) {
+  if (loading && !overviewData) {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4 text-center">
         <Loader2 className="w-8 h-8 animate-spin text-[#EEEFF2]" />
@@ -106,8 +111,8 @@ export default function DashboardPage() {
         <p className="font-sans text-xs text-rose-300 mb-5">{error}</p>
         <button
           type="button"
-          onClick={() => fetchAllData()}
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#EEEFF2] text-[#010101] font-semibold text-xs transition-all shadow-md active:scale-95"
+          onClick={() => fetchAllData(activeStoreId)}
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#EEEFF2] text-[#010101] font-semibold text-xs transition-all shadow-md active:scale-95 cursor-pointer"
         >
           <RefreshCw className="w-3.5 h-3.5" />
           <span>ลองใหม่อีกครั้ง</span>
@@ -115,6 +120,8 @@ export default function DashboardPage() {
       </div>
     );
   }
+
+  const currentStoreId = activeStoreId || overviewData?.store?.id || 1;
 
   return (
     <div className="space-y-10 pb-16">
@@ -124,8 +131,8 @@ export default function DashboardPage() {
           <StoreOverviewCard
             data={overviewData}
             onRenewSuccess={handleRenewSuccess}
-            selectedStoreId={selectedStoreId || overviewData.store.id}
-            onSelectStore={(id) => setSelectedStoreId(id)}
+            selectedStoreId={currentStoreId}
+            onSelectStore={(id) => setActiveStoreId(id)}
           />
         )}
       </section>
@@ -134,10 +141,10 @@ export default function DashboardPage() {
       <section id="products">
         <ProductManagement
           products={products}
-          selectedStoreId={selectedStoreId || overviewData?.store?.id || 1}
+          selectedStoreId={currentStoreId}
           onRefresh={() => {
-            fetchProducts();
-            fetchOverview();
+            fetchProducts(currentStoreId);
+            fetchOverview(currentStoreId);
           }}
         />
       </section>
@@ -147,9 +154,9 @@ export default function DashboardPage() {
         <OrderVerification
           orders={orders}
           onRefresh={() => {
-            fetchOrders();
-            fetchProducts();
-            fetchOverview();
+            fetchOrders(currentStoreId);
+            fetchProducts(currentStoreId);
+            fetchOverview(currentStoreId);
           }}
         />
       </section>

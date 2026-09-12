@@ -65,17 +65,18 @@ export async function POST(req: NextRequest) {
       [userId]
     );
 
-    // 4. บวกเวลา expires_at เพิ่ม 30 วันในตาราง stores
+    // 4. บวกเวลา expires_at เพิ่ม 30 วันในตาราง stores และปรับ status เป็น active
     await query(
       `UPDATE stores 
-       SET expires_at = IF(expires_at > NOW(), DATE_ADD(expires_at, INTERVAL 30 DAY), DATE_ADD(NOW(), INTERVAL 30 DAY))
+       SET expires_at = IF(expires_at > NOW(), DATE_ADD(expires_at, INTERVAL 30 DAY), DATE_ADD(NOW(), INTERVAL 30 DAY)),
+           status = 'active'
        WHERE id = ?`,
       [store.id]
     );
 
     // 5. ดึงข้อมูลใหม่เพื่อตอบกลับ
     const updatedStore = await query<any[]>(
-      "SELECT expires_at FROM stores WHERE id = ? LIMIT 1",
+      "SELECT expires_at, status FROM stores WHERE id = ? LIMIT 1",
       [store.id]
     );
 
@@ -89,7 +90,7 @@ export async function POST(req: NextRequest) {
         store_id: store.id,
         tokens: newTokens,
         expires_at: newExpiresAt.toISOString(),
-        status: "Active",
+        status: updatedStore[0].status || "active",
       },
     });
   } catch (error: any) {

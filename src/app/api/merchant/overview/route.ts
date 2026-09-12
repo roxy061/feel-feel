@@ -64,9 +64,10 @@ export async function GET(req: NextRequest) {
     const diffTime = expiresAt.getTime() - now.getTime();
     const daysRemaining = Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
 
-    // 3. ดึงสถิติคำสั่งซื้อ (รวมทุกร้านค้าของเจ้าของร้าน หรือกรองตามร้าน)
+    // 3. ดึงสถิติคำสั่งซื้อ (เฉพาะร้านค้าที่เลือก หรือรวมทุกร้านถ้าไม่ได้ระบุ)
+    const targetStoreId = selectedStoreId ? store.id : null;
     const storeIds = allStores.map((s) => s.id);
-    const inClause = storeIds.join(",");
+    const inClause = targetStoreId ? String(targetStoreId) : (storeIds.length > 0 ? storeIds.join(",") : "0");
 
     const stats = await query<any[]>(
       `SELECT 

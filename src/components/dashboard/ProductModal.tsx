@@ -2,6 +2,15 @@
 
 import { useState, useEffect } from "react";
 import { X, Package, Tag, DollarSign, Layers, ImageIcon, FileText, CheckCircle2, Loader2, Store } from "lucide-react";
+import { useStores } from "@/context/StoreContext";
+
+export const OFFICIAL_CATEGORIES = [
+  "Aero & Carbon",
+  "Engine & Tuning",
+  "Braking System",
+  "Electronics & Telemetry",
+  "Exhaust & Intake",
+] as const;
 
 export interface ProductData {
   id?: number;
@@ -28,12 +37,13 @@ export default function ProductModal({
   onClose,
   onSaved,
 }: ProductModalProps) {
+  const { stores } = useStores();
   const [storeId, setStoreId] = useState(1);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
   const [stock, setStock] = useState("");
-  const [category, setCategory] = useState("Performance");
+  const [category, setCategory] = useState<string>("Aero & Carbon");
   const [imageUrl, setImageUrl] = useState("");
   const [isAvailable, setIsAvailable] = useState(true);
 
@@ -47,7 +57,7 @@ export default function ProductModal({
       setDescription(product.description || "");
       setPrice(String(product.price || ""));
       setStock(String(product.stock ?? ""));
-      setCategory(product.category || "Performance");
+      setCategory(product.category || "Aero & Carbon");
       setImageUrl(product.image_url || "");
       setIsAvailable(Boolean(product.is_available));
     } else {
@@ -56,7 +66,7 @@ export default function ProductModal({
       setDescription("");
       setPrice("");
       setStock("10");
-      setCategory("Performance");
+      setCategory("Aero & Carbon");
       setImageUrl("");
       setIsAvailable(true);
     }
@@ -149,8 +159,18 @@ export default function ProductModal({
                 onChange={(e) => setStoreId(Number(e.target.value))}
                 className="w-full px-3.5 py-2.5 rounded-xl bg-[#010101] border border-[#EEEFF2]/20 font-sans text-xs text-[#EEEFF2] focus:outline-none focus:border-[#EEEFF2] cursor-pointer"
               >
-                <option value={1}>Apex Performance (Subdomain: /apex)</option>
-                <option value={3}>3NFM Motorsport Lab (Subdomain: /3nfm)</option>
+                {stores && stores.length > 0 ? (
+                  stores.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.name} (Subdomain: /{s.subdomain})
+                    </option>
+                  ))
+                ) : (
+                  <>
+                    <option value={1}>Apex Performance (Subdomain: /apex)</option>
+                    <option value={3}>3NFM Motorsport Lab (Subdomain: /3nfm)</option>
+                  </>
+                )}
               </select>
             </div>
           )}
@@ -164,7 +184,7 @@ export default function ProductModal({
               required
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="เช่น Apex Carbon Fiber Aero Wing"
+              placeholder="เช่น Carbon Fiber Aero GT Wing"
               className="w-full px-3.5 py-2.5 rounded-xl bg-[#010101] border border-[#EEEFF2]/20 font-sans text-xs text-[#EEEFF2] placeholder-[#EEEFF2]/30 focus:outline-none focus:border-[#EEEFF2]"
             />
           </div>
@@ -172,7 +192,7 @@ export default function ProductModal({
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block font-sans text-xs font-medium text-[#EEEFF2]/80 mb-1">
-                ราคาจำหน่าย (บาท)
+                ราคาจำหน่าย (THB)
               </label>
               <input
                 type="number"
@@ -202,15 +222,22 @@ export default function ProductModal({
 
           <div>
             <label className="block font-sans text-xs font-medium text-[#EEEFF2]/80 mb-1">
-              หมวดหมู่สินค้า
+              หมวดหมู่สินค้า (5 Official Categories)
             </label>
-            <input
-              type="text"
+            <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              placeholder="เช่น Aerodynamics, Braking System"
-              className="w-full px-3.5 py-2.5 rounded-xl bg-[#010101] border border-[#EEEFF2]/20 font-sans text-xs text-[#EEEFF2] placeholder-[#EEEFF2]/30 focus:outline-none focus:border-[#EEEFF2]"
-            />
+              className="w-full px-3.5 py-2.5 rounded-xl bg-[#010101] border border-[#EEEFF2]/20 font-sans text-xs text-[#EEEFF2] focus:outline-none focus:border-[#EEEFF2] cursor-pointer"
+            >
+              {OFFICIAL_CATEGORIES.map((cat) => (
+                <option key={cat} value={cat}>
+                  {cat}
+                </option>
+              ))}
+              {!OFFICIAL_CATEGORIES.includes(category as any) && category && (
+                <option value={category}>{category}</option>
+              )}
+            </select>
           </div>
 
           <div>

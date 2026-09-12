@@ -77,6 +77,14 @@ export default function HomePage() {
             </div>
 
             <Link
+              href="/onboarding"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-xs font-semibold text-amber-300 transition-all"
+            >
+              <Store className="w-3.5 h-3.5 text-amber-400" />
+              <span>เปิดร้านใหม่ (Free 14 วัน)</span>
+            </Link>
+
+            <Link
               href="/dashboard"
               className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#272835] hover:bg-[#343647] border border-[#EEEFF2]/20 text-xs font-semibold text-[#EEEFF2] transition-all"
             >
@@ -112,20 +120,28 @@ export default function HomePage() {
 
           <div className="flex flex-wrap items-center justify-center gap-4">
             <Link
-              href="/dashboard"
+              href="/onboarding"
               className="inline-flex items-center gap-2.5 px-6 py-3.5 rounded-xl bg-[#EEEFF2] text-[#010101] hover:bg-[#EEEFF2]/90 text-sm font-semibold transition-all shadow-xl active:scale-95"
             >
-              <LayoutDashboard className="w-4 h-4 text-[#010101]" />
-              <span>เข้าสู่ Merchant Dashboard</span>
+              <Store className="w-4 h-4 text-[#010101]" />
+              <span>เปิดร้านค้าของคุณเอง (ฟรี 14 วัน)</span>
               <ArrowRight className="w-4 h-4 text-[#010101]" />
             </Link>
 
             <Link
-              href="/3nfm"
+              href="/dashboard"
               className="inline-flex items-center gap-2 px-5 py-3.5 rounded-xl bg-[#272835] hover:bg-[#343647] border border-[#EEEFF2]/20 text-sm font-medium text-[#EEEFF2] transition-all"
             >
+              <LayoutDashboard className="w-4 h-4 text-emerald-400" />
+              <span>Merchant Dashboard</span>
+            </Link>
+
+            <Link
+              href="/3nfm"
+              className="inline-flex items-center gap-2 px-5 py-3.5 rounded-xl bg-transparent hover:bg-[#272835]/50 border border-[#EEEFF2]/15 text-sm font-medium text-[#EEEFF2]/80 transition-all"
+            >
               <Store className="w-4 h-4 text-amber-400" />
-              <span>หน้าร้าน 3NFM Motorsport</span>
+              <span>หน้าร้าน 3NFM</span>
             </Link>
 
             <Link
@@ -133,7 +149,7 @@ export default function HomePage() {
               className="inline-flex items-center gap-2 px-5 py-3.5 rounded-xl bg-transparent hover:bg-[#272835]/50 border border-[#EEEFF2]/15 text-sm font-medium text-[#EEEFF2]/80 transition-all"
             >
               <Store className="w-4 h-4 text-sky-400" />
-              <span>หน้าร้าน Apex Performance</span>
+              <span>หน้าร้าน Apex</span>
             </Link>
           </div>
         </div>

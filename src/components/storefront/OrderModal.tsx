@@ -257,7 +257,7 @@ export default function OrderModal({
               <div className="flex justify-between text-[#EEEFF2]/70">
                 <span>ยอดเงินชำระ:</span>
                 <span className="text-emerald-400 font-mono font-bold">
-                  {orderSuccess.total_amount.toLocaleString("th-TH", { minimumFractionDigits: 2 })} บาท
+                  {orderSuccess.total_amount.toLocaleString("th-TH", { minimumFractionDigits: 2 })} THB
                 </span>
               </div>
               <div className="flex justify-between text-[#EEEFF2]/70">
@@ -349,7 +349,7 @@ export default function OrderModal({
               </div>
               <div className="text-right">
                 <div className="font-mono text-base font-bold text-emerald-400">
-                  {numPrice.toLocaleString("th-TH", { minimumFractionDigits: 2 })} บาท
+                  {numPrice.toLocaleString("th-TH", { minimumFractionDigits: 2 })} <span className="text-xs font-mono text-emerald-300">THB</span>
                 </div>
               </div>
             </div>
@@ -475,7 +475,7 @@ export default function OrderModal({
                     </div>
                     <div className="font-mono text-3xl font-bold text-emerald-400 tracking-tight">
                       {totalPrice.toLocaleString("th-TH", { minimumFractionDigits: 2 })}{" "}
-                      <span className="text-sm font-sans text-[#EEEFF2]/70 font-normal">บาท</span>
+                      <span className="text-sm font-mono text-emerald-300 font-semibold">THB</span>
                     </div>
                     <div className="font-sans text-xs text-[#EEEFF2]/70 mt-1">
                       บัญชีรับเงิน: <span className="font-semibold text-[#EEEFF2]">นาย ภคพล สมัยแก้ว</span> (KBank PromptPay)
@@ -568,7 +568,7 @@ export default function OrderModal({
                   ) : (
                     <>
                       <ShieldCheck className="w-4 h-4 text-[#010101]" />
-                      <span>ยืนยันและชำระเงิน ({totalPrice.toLocaleString("th-TH")} บาท)</span>
+                      <span>ยืนยันและชำระเงิน ({totalPrice.toLocaleString("th-TH", { minimumFractionDigits: 2 })} THB)</span>
                       <ArrowRight className="w-4 h-4 text-[#010101]" />
                     </>
                   )}
