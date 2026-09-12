@@ -101,12 +101,25 @@ export async function GET(req: NextRequest) {
     });
   } catch (error: any) {
     console.error("[Check Subdomain Error]:", error);
+    
+    let reason = error?.message || "เกิดข้อผิดพลาดในการตรวจสอบ Subdomain";
+    const isConnRefused =
+      reason.includes("ECONNREFUSED") ||
+      reason.includes("PROTOCOL_CONNECTION_LOST") ||
+      reason.includes("ETIMEDOUT") ||
+      reason.includes("ENOTFOUND");
+
+    if (isConnRefused) {
+      reason = "ไม่สามารถเชื่อมต่อฐานข้อมูล MySQL (Port 3306) ได้ กรุณาเปิดโปรแกรม XAMPP Control Panel แล้วกด 'Start' ที่โมดูล MySQL";
+    }
+
     return NextResponse.json(
       {
         available: false,
-        reason: error?.message || "เกิดข้อผิดพลาดในการตรวจสอบ Subdomain",
+        reason,
+        db_offline: isConnRefused,
       },
-      { status: 500 }
+      { status: isConnRefused ? 503 : 500 }
     );
   }
 }

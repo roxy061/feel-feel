@@ -15,7 +15,7 @@ const host =
   process.env.DB_HOST ||
   process.env.MYSQL_HOST ||
   process.env.TIDB_HOST ||
-  "localhost";
+  "127.0.0.1";
 
 // ตรวจสอบการเปิดใช้งาน SSL สำหรับ Cloud Database (TiDB Cloud, Aiven, PlanetScale, AWS RDS)
 const isSslEnabled =
@@ -88,14 +88,32 @@ if (process.env.NODE_ENV !== "production") {
 }
 
 /**
- * Helper to run queries with automatic connection handling
+ * Helper to run queries with automatic connection handling and transient retry
  */
 export async function query<T = any>(
   sql: string,
   values?: any[]
 ): Promise<T> {
-  const [results] = await db.query(sql, values);
-  return results as T;
+  try {
+    const [results] = await db.query(sql, values);
+    return results as T;
+  } catch (error: any) {
+    const isTransient =
+      error?.code === "ECONNRESET" ||
+      error?.code === "PROTOCOL_CONNECTION_LOST" ||
+      error?.code === "ETIMEDOUT" ||
+      error?.message?.includes("closed");
+
+    if (isTransient) {
+      try {
+        const [retryResults] = await db.query(sql, values);
+        return retryResults as T;
+      } catch (retryErr) {
+        throw retryErr;
+      }
+    }
+    throw error;
+  }
 }
 
 export default db;
